@@ -59,12 +59,12 @@ class AppError
         }
 
         $config = static::getConfig();
-        $logger = new ErrorLogger();
-        $logger->register();
 
         if (!$config['display']) {
             error_reporting(0);
             ini_set('display_errors', '0');
+            $logger = new ErrorLogger();
+            $logger->register();
         }
     }
 }
