@@ -59,8 +59,8 @@ class AppError
         }
 
         $config = static::getConfig();
-        // $logger = new ErrorLogger();
-        // $logger->register();
+        $logger = new ErrorLogger();
+        $logger->register();
 
         if (!$config['display']) {
             error_reporting(0);

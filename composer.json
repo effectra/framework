@@ -38,6 +38,7 @@
         "effectra/http-server-handler": "^1.0",
         "effectra/mail": "^1.0",
         "effectra/link": "^1.0",
+        "effectra/log": "^1.0",
         "effectra/router": "^1.0",
         "effectra/session": "^1.0",
         "effectra/security": "^1.0",
