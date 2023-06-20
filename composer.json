@@ -1,0 +1,51 @@
+{
+    "name": "effectra/framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Effectra\\Core\\": "src/"
+        },
+        "files": [
+            "src/Helpers.php"
+          ]
+    },
+    "authors": [
+        {
+            "name": "Mohammed Taha",
+            "email": "info@mohammedtaha.net"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "guzzlehttp/guzzle": "^7.7",
+        "bmt/plural-converter": "^1.0",
+        "php-di/php-di": "^7.0",
+        "symfony/console": "^6.0",
+        "symfony/var-dumper": "^6.0",
+        "filp/whoops": "^2.15",
+        "psr/http-message": "^2.0",
+        "effectra/config": "^1.0",
+        "effectra/contracts": "^1.0",
+        "effectra/sql-query": "^1.0",
+        "effectra/db": "^1.0",
+        "effectra/clock": "^1.0",
+        "effectra/fs": "^1.0",
+        "effectra/http-message": "^1.0",
+        "effectra/http-foundation": "^1.0",
+        "effectra/http-factory": "^1.0",
+        "effectra/http-extensions": "^1.0",
+        "effectra/http-server-handler": "^1.0",
+        "effectra/mail": "^1.0",
+        "effectra/link": "^1.0",
+        "effectra/router": "^1.0",
+        "effectra/session": "^1.0",
+        "effectra/security": "^1.0",
+        "effectra/to-string": "^1.0",
+        "effectra/generator": "^1.0",
+        "effectra/renova": "^1.0",
+        "effectra/third-party": "^1.0",
+        "effectra/http-middleware": "^1.0",
+        "effectra/minifyer": "^1.0"
+    }
+}
