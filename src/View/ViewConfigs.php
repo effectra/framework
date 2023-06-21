@@ -59,8 +59,8 @@ class ViewConfigs
         return [
             // ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
             ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME],
-            ['WEB_ENCORE_JS' => $webpackEncore->scriptTags('app')],
-            ['WEB_ENCORE_CSS' => $webpackEncore->linkTags('app')],
+            ['WEB_ENCORE_JS' => $webpackEncore->scriptTags('app')] ?? '',
+            ['WEB_ENCORE_CSS' => $webpackEncore->linkTags('app')] ?? '',
         ];
     }
 }
