@@ -3,6 +3,7 @@
 namespace Effectra\Core\View;
 
 use Effectra\Core\Application;
+use Effectra\Core\EncoreProvider\WebpackEncore;
 use Effectra\Core\Request;
 use Effectra\Fs\Path;
 use Effectra\Link\Link;
@@ -53,9 +54,13 @@ class ViewConfigs
      */
     public static function templateGlobalVars(): array
     {
+        $webpackEncore = new WebpackEncore();
+
         return [
             // ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
-            ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME]
+            ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME],
+            ['WEB_ENCORE_JS' => $webpackEncore->scriptTags('app')],
+            ['WEB_ENCORE_CSS' => $webpackEncore->linkTags('app')],
         ];
     }
 }

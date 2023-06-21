@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Effectra\Core;
 
 use Effectra\Config\ConfigFile;
-use Effectra\Core\EncoreProvider\WebpackEncore;
 use Effectra\Core\View\ViewConfigs;
 use Effectra\Fs\Path;
 use Effectra\Minifyer\Minify;
@@ -26,12 +25,10 @@ class View
      *
      * @param Reader $reader The reader object for reading view files.
      * @param ConfigFile $config The configuration file object.
-     * @param WebpackEncore $encore The WebpackEncore object for managing asset links and scripts.
      */
     public function __construct(
         protected Reader $reader,
-        protected ConfigFile $config,
-        protected WebpackEncore $encore,
+        protected ConfigFile $config
     ) {
 
     }
@@ -46,27 +43,6 @@ class View
     public function register(array $content, string $type = 'functions')
     {
         // Implementation
-    }
-
-    /**
-     * Add links and scripts to the HTML content.
-     *
-     * @param string $html The HTML content to modify.
-     * @param string $links The link tags to add.
-     * @param string $scripts The script tags to add.
-     * @return string The modified HTML content.
-     */
-    function addLinksAndScripts($html, $links, $scripts)
-    {
-        $pattern = '</head>';
-
-        // Add link tags
-        $html = str_replace($pattern, $links . "\n</head>", $html);
-
-        // Add script tags
-        $html = str_replace($pattern, $scripts . "\n</head>", $html);
-
-        return $html;
     }
 
     /**
@@ -87,11 +63,6 @@ class View
             ViewConfigs::templateGlobalVars(),
             $this->reader
         ))->send();
-
-        $links = $this->encore->linkTags('app');
-        $scripts = $this->encore->scriptTags('app');
-
-        $content = $this->addLinksAndScripts($content, $links, $scripts);
 
         return Minify::html($content);
     }
