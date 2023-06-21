@@ -9,6 +9,7 @@ use Effectra\Fs\Path;
 use Effectra\Link\Link;
 use Effectra\Link\LinkProvider;
 use Effectra\Renova\Reader;
+use Effectra\Security\Csrf;
 
 /**
  * The ViewConfigs class provides configurations for template functions and global variables used in views.
@@ -54,13 +55,26 @@ class ViewConfigs
      */
     public static function templateGlobalVars(): array
     {
-        $webpackEncore = new WebpackEncore();
 
         return [
-            // ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
+            ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
             ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME],
-            ['WEB_ENCORE_JS' => $webpackEncore->scriptTags('app')] ?? '',
-            ['WEB_ENCORE_CSS' => $webpackEncore->linkTags('app')] ?? '',
+            ['WEB_ENCORE_JS' => function ($webpackEncore) {
+                try {
+                    $webpackEncore = new WebpackEncore();
+                    $webpackEncore->scriptTags('app');
+                } catch (\Exception $e) {
+                    return 'WEB_ENCORE_JS error('. $e->getMessage() .')';
+                }
+            }],
+            ['WEB_ENCORE_CSS' => function ($webpackEncore) {
+                try {
+                    $webpackEncore = new WebpackEncore();
+                    $webpackEncore->linkTags('app');
+                } catch (\Exception $e) {
+                    return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';
+                }
+            }],
         ];
     }
 }
