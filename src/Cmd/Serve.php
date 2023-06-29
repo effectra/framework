@@ -11,7 +11,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * The Serve command starts a PHP development server on localhost:8080
@@ -33,25 +32,6 @@ class Serve extends Command
      * @var string
      */
     protected static $defaultDescription = 'Start the development server';
-
-    /**
-     * The event dispatcher instance.
-     *
-     * @var EventDispatcherInterface|null
-     */
-    private $eventDispatcher;
-
-    /**
-     * Create a new Serve command instance.
-     *
-     * @param EventDispatcherInterface|null $eventDispatcher
-     */
-    public function __construct(EventDispatcherInterface $eventDispatcher = null)
-    {
-        parent::__construct();
-
-        $this->eventDispatcher = $eventDispatcher;
-    }
 
     /**
      * Configure the command options.
@@ -89,12 +69,7 @@ class Serve extends Command
         $output->writeln("<fg=green>Server started:</> <fg=yellow>http://localhost:{$port}</>");
         $output->writeln("<fg=green>Document root:</> <fg=yellow>{$publicDir}</>");
         
-        AppServer::run($port);
-
-        // Emit a "server stopped" event
-        if ($this->eventDispatcher) {
-            $this->eventDispatcher->dispatch(new ServerStoppedEvent());
-        }
+        return AppServer::run($port);
 
         return Command::SUCCESS;
     }

@@ -134,7 +134,7 @@ if (!function_exists('fetch')) {
 if (!function_exists('import')) {
     function import($file)
     {
-        $path = Application::storagePath('import') . Path::ds() . $file;
+        $path = Application::storagePath('imports') . Path::ds() . $file;
         return File::getContent($path);
     }
 }
@@ -142,7 +142,7 @@ if (!function_exists('import')) {
 if (!function_exists('importJson')) {
     function importJson($file, $associative = null)
     {
-        $path = Application::storagePath('import') . Path::ds() . $file . '.json';
+        $path = Application::storagePath('imports') . Path::ds() . $file . '.json';
         return Json::decode($path, $associative);
     }
 }
@@ -150,7 +150,7 @@ if (!function_exists('importJson')) {
 if (!function_exists('export')) {
     function export($fileName, $content, $lock = false): int|false
     {
-        $path = Application::storagePath('export') . Path::ds() . $fileName;
+        $path = Application::storagePath('exports') . Path::ds() . $fileName;
         return File::put($path, $content, $lock);
     }
 }
@@ -158,10 +158,19 @@ if (!function_exists('export')) {
 if (!function_exists('exportJson')) {
     function exportJson($fileName, $content, $lock = false): int|false
     {
-        $path = Application::storagePath('export') . Path::ds() . $fileName . '.json';
+        $path = Application::storagePath('exports') . Path::ds() . $fileName . '.json';
         return File::put($path, $content, $lock);
     }
 }
+
+
+if (!function_exists('now')) {
+    function now(): string
+    {
+        return date('Y-m-d H:i:s');
+    }
+}
+
 
 if (!function_exists('pre')) {
     function pre(mixed $value, array ...$values): void

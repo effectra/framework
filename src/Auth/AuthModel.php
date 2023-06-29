@@ -15,21 +15,12 @@ use Effectra\SqlQuery\Query;
  */
 trait AuthModel
 {
-    /**
-     * Get the database instance.
-     *
-     * @return DB The database instance.
-     */
-    public static function db(): DB
-    {
-        return Application::container()->get(DB::class);
-    }
 
     /**
      * Get a user record by email.
      *
      * @param string $email The email to search for.
-     * @return mixed|null The user record if found, or null otherwise.
+     * @return object|null The user record if found, or null otherwise.
      */
     public static function getEmail($email)
     {
@@ -37,11 +28,10 @@ trait AuthModel
 
         $query = Query::select(static::$table)->where($credentials)->limit(1);
         $result = static::db()->withQuery($query)->get(['email' => $email]);
-        
-        if ($result) {
-            return $result[0];
+        if ($result && !empty($result)) {
+            return (object) $result[0];
         }
-        
+
         return null;
     }
 
@@ -98,6 +88,26 @@ trait AuthModel
         $result = static::db()->withQuery($query)->run([
             'verified' => 1,
             'email_verified_at' => Query::CURRENT_TIMESTAMP,
+            'updated_at' => Query::CURRENT_TIMESTAMP
+        ]);
+
+        return $result;
+    }
+
+    /**
+     * Reset a user's Token.
+     *
+     * @param string $newToken The new token.
+     * @param int|string $id The user ID.
+     * @return bool The result of the update operation.
+     */
+    public static function updateToken(string $newToken,int|string $id):bool
+    {
+        $query = Query::update(static::$table)->columns(['token', 'updated_at'])->values([':token', ':updated_at'])->where(['id' => ':id']);
+
+        $result = static::db()->withQuery($query)->run([
+            'id' => $id,
+            'token' => $newToken,
             'updated_at' => Query::CURRENT_TIMESTAMP
         ]);
 

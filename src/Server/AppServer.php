@@ -19,8 +19,20 @@ class AppServer
      */
     public static function run(int $port): void
     {
+        if(!static::isAvailablePort($port)){
+            echo "\033[0;31m This port '$port' it's not available now \033[0m";
+            die;
+        }
+        
         $command = sprintf("php -S %s:%s -t public/", static::$HOST_NAME, $port);
-        exec($command);
+        $output = [];
+        exec($command, $output);
+        
+        // Display the output with styling
+        foreach ($output as $line) {
+            $formattedLine = '[' . date('Y-m-d H:i:s') . ']......................................' . $line;
+            echo "\033[0;36m$formattedLine\033[0m" . PHP_EOL;
+        }
     }
 
     /**

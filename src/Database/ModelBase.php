@@ -129,7 +129,7 @@ trait ModelBase
         $query = (string) Query::select(static::$table)->where($conditions);
         $result = static::db()->withQuery($query)->get();
         if ($result) {
-            $data = static::pretty($result)[0];
+            $data = static::pretty($result);
 
             return $associative ? $data : (object) $data;
         }
@@ -146,14 +146,13 @@ trait ModelBase
     {
         $query = Query::insert(static::$table);
 
-        $query->values(static::values());
 
         $query->columns(static::columns());
+        $query->values(static::values());
 
         if (empty($query->getValues())) {
             throw new \Exception("No values specified for insertion.");
         }
-
         $success = static::db()->withQuery((string) $query)->run();
         if ($success) {
             return (object) ['id' => static::db()->getConn()->lastInsertId()];
@@ -182,6 +181,28 @@ trait ModelBase
         $result = static::db()->withQuery($query)->run($query->combineColumnsValues());
         return $result;
     }
+
+    /**
+     * Update a record.
+     *
+     * @param mixed $conditions The conditions of the record to update.
+     * @return bool Whether the update operation was successful.
+     * @throws \Exception If no values specified for update.
+     */
+    public static function updateWhere($conditions)
+    {
+        $query = Query::Update(static::$table)->where($conditions);
+
+        $query->values(static::values());
+        $query->columns(static::columns());
+
+        if (empty($query->getValues())) {
+            throw new \Exception("No values specified for insertion.");
+        }
+        $result = static::db()->withQuery($query)->run($query->combineColumnsValues());
+        return $result;
+    }
+
 
     /**
      * Search for records based on conditions.

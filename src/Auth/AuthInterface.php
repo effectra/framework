@@ -22,9 +22,9 @@ interface AuthInterface
     /**
      * Check the user's credentials.
      *
-     * @return void
+     * @return bool
      */
-    public function checkCredentials();
+    public function checkCredentials(string $email, string $password):bool;
 
     /**
      * Log out the user.

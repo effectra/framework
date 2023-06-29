@@ -6,17 +6,25 @@ namespace Effectra\Core\Router;
 
 use Effectra\Core\Application;
 use Effectra\Fs\File;
+use Effectra\Http\Message\Uri;
 use Effectra\Router\Route;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * The AppRoute class manages routes for different types (API, web) in the application.
  */
 class AppRoute
 {
+    /**
+     * @var array $routerTypes define routes files 
+     */
     protected array $routerTypes = ['api', 'web'];
 
+    /** 
+     * @param Route $router The router instance.
+     * @return void
+     */
     public function __construct(protected Route $router)
     {
     }
@@ -46,13 +54,13 @@ class AppRoute
     /**
      * Set the request and response for the router.
      *
-     * @param RequestInterface  $request  The request object.
+     * @param ServerRequestInterface  $request  The request object.
      * @param ResponseInterface $response The response object.
      */
-    public function set(RequestInterface $request, ResponseInterface $response): void
+    public function set(ServerRequestInterface $request, ResponseInterface $response): void
     {
-        $this->router->addResponse($response);
         $this->router->addRequest($request);
+        $this->router->addResponse($response);
     }
 
     /**
@@ -85,12 +93,20 @@ class AppRoute
     /**
      * Handle the incoming request and return the response.
      *
-     * @param RequestInterface $request The incoming request.
+     * @param ServerRequestInterface $request The incoming request.
      *
      * @return ResponseInterface The response to send.
      */
-    public function handle(RequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $uri = new Uri($_ENV['APP_URL']);
+
+        $requestUri = $request->getUri();
+
+        $newPath = str_replace($uri->getPath(),'',$requestUri->getPath());
+
+        $request = $request->withUri($uri->withPath($newPath));
+
         if (Application::isApiPath($request)) {
             $this->router->setNotFound(function () {
                 return response()->json([
@@ -98,6 +114,8 @@ class AppRoute
                 ]);
             });
         }
+
+
         $response = $this->router->dispatch($request);
 
         return $response;

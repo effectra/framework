@@ -25,7 +25,7 @@ class Routes extends Command
     {
         $table = new Table($output);
 
-        $router = Application::container()->get(Route::class);
+        $router = router();
 
         $webFile =  Application::routesPath('web.php');
         $apiFile =  Application::routesPath('api.php');

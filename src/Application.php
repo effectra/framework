@@ -237,6 +237,7 @@ class Application
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+
         AppError::endpoint($request);
 
         // Handle Errors
@@ -251,6 +252,8 @@ class Application
 
         $response = new Response();
 
+        $request = Request::convertRequest($request);
+
         $handler = new RequestHandler($response, $middlewares);
 
         $response = $handler->handle($request);
@@ -258,14 +261,9 @@ class Application
         // Handle Router
         $router = new AppRoute(new Route());
 
+        // Set Request & Response for controller
         $router->set(
-            new Request(
-                $request->getMethod(),
-                $request->getUri(),
-                $request->getHeaders(),
-                $request->getBody(),
-                $request->getProtocolVersion(),
-            ),
+            $request,
             $response
         );
 

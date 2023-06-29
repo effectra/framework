@@ -32,9 +32,24 @@ class Authentication implements AuthInterface
      *
      * @return void
      */
-    public function checkCredentials()
+
+    /**
+     * Check the user's credentials.
+     *
+     * @param string $email The email of the user.
+     * @param string $password The password of the user.
+     * @return bool Whether the user's credentials are valid or not.
+     */
+    public function checkCredentials(string $email, string $password): bool
     {
-        // Implementation
+        $user = User::getEmail($email);
+
+        if ($user) {
+            $verify = Hash::verifyPassword($password, $user->password);
+            return $verify;
+        }
+
+        return false;
     }
 
     /**
@@ -72,10 +87,10 @@ class Authentication implements AuthInterface
         $data = [
             'username' => $username,
             'email' => $email,
-            'password' => Hash::setPassword($password)
+            'password' => Hash::setPassword($password),
+            'token' => Token::generateToken(50)
         ];
         $user = User::getEmail($email);
-        dd($user, $data);
         if ($user) {
             return null;
         }
@@ -91,12 +106,13 @@ class Authentication implements AuthInterface
      *
      * @param string $email The email of the user.
      * @param string $password The password of the user.
-     * @return User|null The logged in user object, or null if login fails.
+     * @return object|null The logged in user object, or null if login fails.
      */
     public function login(string $email, string $password)
     {
-        $user = (object) User::getEmail($email);
-        if (!empty($user)) {
+        $user = User::getEmail($email);
+
+        if ($user) {
             $verify = Hash::verifyPassword($password, $user->password);
             if ($verify) {
                 return $user;
@@ -104,5 +120,30 @@ class Authentication implements AuthInterface
         }
 
         return null;
+    }
+
+    /**
+     * Retrieve the user associated with the provided login token.
+     *
+     * @param string $token The login token.
+     * @return User|null The user associated with the token, or null if not found.
+     */
+    public function getUserByToken(string $token)
+    {
+        $decode = Token::get($token);
+        $userId = $decode->data->id;
+        return User::find($userId);
+    }
+
+    /**
+     * Validate if a user is authenticated based on the provided login token.
+     *
+     * @param string $token The login token.
+     * @return bool Whether the user is authenticated or not.
+     */
+    public function isAuthenticated(string $token): bool
+    {
+        $decode = Token::get($token);
+        return Token::validateTime($decode);
     }
 }

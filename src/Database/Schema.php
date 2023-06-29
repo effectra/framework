@@ -41,7 +41,6 @@ class Schema
         $table->setColumns($cols);
         call_user_func($callback, $table);
         $query = $table->buildQuery('modify');
-
         if (!empty($query)) {
             DB::withQuery($query)->run();
         }

@@ -34,12 +34,12 @@
         "effectra/http-message": "^1.0",
         "effectra/http-foundation": "^1.0",
         "effectra/http-factory": "^1.0",
-        "effectra/http-extensions": "^1.0",
-        "effectra/http-server-handler": "^1.0",
+        "effectra/http-extensions": "^2.0",
+        "effectra/http-server-handler": "^2.0",
         "effectra/mail": "^1.0",
         "effectra/link": "^1.0",
         "effectra/log": "^1.0",
-        "effectra/router": "^1.0",
+        "effectra/router": "^2.0",
         "effectra/session": "^1.0",
         "effectra/security": "^1.0",
         "effectra/to-string": "^1.0",
@@ -47,6 +47,7 @@
         "effectra/renova": "^1.0",
         "effectra/third-party": "^1.0",
         "effectra/http-middleware": "^1.0",
-        "effectra/minifyer": "^1.0"
+        "effectra/minifyer": "^1.0",
+        "vlucas/valitron": "^1.4"
     }
 }
