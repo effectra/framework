@@ -105,6 +105,10 @@ class AppRoute
 
         $newPath = str_replace($uri->getPath(),'',$requestUri->getPath());
 
+        if($newPath === ''){
+            $newPath = '/';
+        }
+
         $request = $request->withUri($uri->withPath($newPath));
 
         if (Application::isApiPath($request)) {

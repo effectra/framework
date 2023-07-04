@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Effectra\Core\Sever;
+namespace Effectra\Core\Server;
 
 class Docker
 {

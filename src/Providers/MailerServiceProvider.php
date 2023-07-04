@@ -11,7 +11,7 @@ use Effectra\Core\Contracts\ProviderInterface;
 use Effectra\Core\Contracts\ServiceInterface;
 use Effectra\Mail\MailerService;
 
-class MailerProvider  extends ServiceProvider implements ServiceInterface
+class MailerServiceProvider  extends ServiceProvider implements ServiceInterface
 {
     public function register(ProviderInterface $provider)
     {
