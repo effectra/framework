@@ -40,9 +40,3 @@ Effectra is open-source software released under the MIT License. See the LICENSE
 ## Acknowledgements
 
 Effectra is built upon the efforts and contributions of many open-source projects and libraries. We would like to express our gratitude to the developers and contributors of these projects for their valuable work.
-
-Please refer to the `ACKNOWLEDGEMENTS.md` file for a list of acknowledgments.
-
----
-
-Feel free to modify and expand this README file as needed to provide more detailed information about the Effectra framework and its features.
