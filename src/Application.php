@@ -6,6 +6,7 @@ namespace Effectra\Core;
 
 use App\AppCore;
 use DI\Container;
+use Effectra\Config\ConfigFile;
 use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Error\AppError;
 use Effectra\Core\Http\Cors;
@@ -86,6 +87,24 @@ class Application
     public function setAppPath(string $path)
     {
         static::$APP_PATH = $path;
+    }
+
+    /**
+     * Get the app configuration.
+     *
+     * @return array The app configuration.
+     */
+    private static function getConfig()
+    {
+        $file = Application::configPath('app.php');
+        $configFile = new ConfigFile($file);
+        $config = $configFile->read();
+
+        return $config;
+    }
+
+    public static function getLang() : string {
+        return static::getConfig()['lang'] ?? 'en';
     }
 
     /**
@@ -182,6 +201,17 @@ class Application
     public static function publicPath(string $path = ''): string
     {
         return static::$APP_PATH . Path::ds() . 'public' . Path::ds() . $path;
+    }
+
+    /**
+     * Get the resources path.
+     *
+     * @param string $path The additional path within the resources directory.
+     * @return string The full path.
+     */
+    public static function resourcesPath(string $path = ''): string
+    {
+        return static::$APP_PATH . Path::ds() . 'resources' . Path::ds() . $path;
     }
 
     /**
