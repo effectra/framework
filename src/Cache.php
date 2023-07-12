@@ -5,15 +5,29 @@ declare(strict_types=1);
 namespace Effectra\Core;
 
 /**
- * @method get(string $key, mixed $default = null): mixed;
- * @method set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool;
- * @method delete(string $key): bool;
- * @method clear(): bool;
- * @method getMultiple(iterable $keys, mixed $default = null): iterable;
- * @method setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool;
- * @method deleteMultiple(iterable $keys): bool;
- * @method has(string $key): bool;
+ * The Cache class is a placeholder implementation for a cache system.
+ *
+ * @method mixed get(string $key, mixed $default = null)
+ * @method bool set(string $key, mixed $value, null|int|\DateInterval $ttl = null)
+ * @method bool delete(string $key)
+ * @method bool clear()
+ * @method iterable getMultiple(iterable $keys, mixed $default = null)
+ * @method bool setMultiple(iterable $values, null|int|\DateInterval $ttl = null)
+ * @method bool deleteMultiple(iterable $keys)
+ * @method bool has(string $key)
  */
 class Cache
 {
+    /**
+     * Handles dynamic method calls.
+     *
+     * @param string $name The name of the method being called.
+     * @param array $arguments The arguments passed to the method.
+     * @return mixed The result of the method call.
+     */
+    public function __call(string $name, array $arguments)
+    {
+        // You can add your implementation here or throw an exception to indicate that the methods are not implemented.
+        throw new \BadMethodCallException('Method ' . $name . '() is not implemented.');
+    }
 }

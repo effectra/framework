@@ -39,7 +39,7 @@
         "effectra/mail": "^1.0",
         "effectra/link": "^1.0",
         "effectra/log": "^1.0",
-        "effectra/router": "^2.0",
+        "effectra/router": "^2.1",
         "effectra/session": "^1.0",
         "effectra/security": "^1.0",
         "effectra/to-string": "^1.0",
@@ -48,6 +48,7 @@
         "effectra/third-party": "^1.0",
         "effectra/http-middleware": "^1.0",
         "effectra/minifyer": "^1.0",
-        "vlucas/valitron": "^1.4"
+        "vlucas/valitron": "^1.4",
+        "effectra/cache": "^1.0"
     }
 }

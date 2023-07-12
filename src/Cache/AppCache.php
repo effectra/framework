@@ -13,15 +13,17 @@ use Effectra\Fs\Directory;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * The AppCache class provides methods for caching operations.
+ */
 class AppCache
 {
-
     /**
      * Get the cache configuration.
      *
      * @return array The cache configuration.
      */
-    public static function getConfig()
+    public static function getConfig(): array
     {
         $file = Application::configPath('cache.php');
         $configFile = new ConfigFile($file);
@@ -30,20 +32,31 @@ class AppCache
         return $config;
     }
 
-    public static function  cacheDirectory(): string
+    /**
+     * Get the cache directory path.
+     *
+     * @return string The cache directory path.
+     */
+    public static function cacheDirectory(): string
     {
         return Application::storagePath('cache');
     }
 
+    /**
+     * Get the cache driver based on the configuration.
+     *
+     * @return CacheInterface|CacheItemPoolInterface|null The cache driver instance.
+     * @throws \Exception If there is an error processing the driver.
+     */
     public static function getDriver(): CacheInterface|CacheItemPoolInterface|null
     {
         $path = static::cacheDirectory();
 
         $config = static::getConfig();
 
-        $default_driver = $config['default_driver'];
+        $defaultDriver = $config['default_driver'];
 
-        $driver = $config['driver'][$default_driver];
+        $driver = $config['driver'][$defaultDriver];
 
         if (!isset($driver)) {
             throw new \Exception("Error Processing Driver");
@@ -64,6 +77,11 @@ class AppCache
         return null;
     }
 
+    /**
+     * Clear the cache by deleting all cache files.
+     *
+     * @return bool True if the cache is cleared successfully, false otherwise.
+     */
     public static function clear(): bool
     {
         $path = static::cacheDirectory();

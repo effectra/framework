@@ -7,19 +7,34 @@ namespace Effectra\Core;
 use Effectra\Fs\Directory;
 use Effectra\Fs\File;
 
+/**
+ * The Localization class handles translation of strings based on the selected language.
+ */
 class Localization
 {
+    /** @var string The selected language. */
     private string $language;
 
+    /** @var array The translations for the selected language. */
     private array $translations = [];
 
+    /**
+     * Localization constructor.
+     *
+     * @param string $language The selected language.
+     */
     public function __construct(string $language)
     {
         $this->language = $language;
         $this->loadTranslations();
     }
 
-    private function loadTranslations() :void
+    /**
+     * Loads the translations for the selected language.
+     *
+     * @return void
+     */
+    private function loadTranslations(): void
     {
         $dir_path = Application::resourcesPath('translations');
 
@@ -40,7 +55,13 @@ class Localization
         }
     }
 
-    public function translate(string $key)
+    /**
+     * Translates a string based on the selected language.
+     *
+     * @param string $key The translation key.
+     * @return string The translated string or the key itself if the translation is not found.
+     */
+    public function translate(string $key): string
     {
         if (isset($this->translations[$key])) {
             return $this->translations[$key];
