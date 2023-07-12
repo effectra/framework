@@ -30,7 +30,7 @@
         "effectra/sql-query": "^1.0",
         "effectra/db": "^1.0",
         "effectra/clock": "^1.0",
-        "effectra/fs": "^1.0",
+        "effectra/fs": "*",
         "effectra/http-message": "^1.0",
         "effectra/http-foundation": "^1.0",
         "effectra/http-factory": "^1.0",
