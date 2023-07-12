@@ -40,12 +40,12 @@ class GenerateConfigFile extends Command
         $io->text('Generate: ' . $savePath);
 
         if (File::exists($savePath)) {
-            $io->warring('File exists !');
+            $io->warning('File exists !');
             return 0;
         }
 
         /** @var GeneratorConfigFile $g */
-        $g = Application::get(GeneratorConfigFile::class);
+        $g = Application::container()->get(GeneratorConfigFile::class);
 
         $state = $g->generate()->save($savePath);
 

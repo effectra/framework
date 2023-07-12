@@ -6,16 +6,16 @@ namespace Effectra\Core\Cmd\Console;
 
 use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Generator\CommandGenerator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 
-use Effectra\Generator\GeneratorClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
-class GenerateConsole extends Command
+class GenerateCommand extends Command
 {
 
     protected function configure()
@@ -34,43 +34,18 @@ class GenerateConsole extends Command
 
         $name = $input->getArgument('name');
 
-        $file = Application::appPath('app' . Path::ds() . 'Commands' . Path::ds() . $name . '.php');
+        $savePath = Application::appPath('app' . Path::ds() . 'Commands' . Path::ds() . $name . '.php');
 
-        $io->text('Generate: ' . $file);
+        $io->text('Generate: ' . $savePath);
 
-        if (File::exists($file)) {
-            $io->warring('File exists !');
+        if (File::exists($savePath)) {
+            $io->warning('File exists !');
             return 0;
         }
 
-        $content = Application::get(GeneratorClass::class);
-
         $className = ucfirst($name) ;
 
-        $state =  $content
-            ->setName($className)
-            ->withNameSpace('App\Commands')
-            ->withPackages([
-                'Effectra\Core\Command'
-            ])
-            ->withExtends('Command')
-            ->withMethod(
-                typeFunction: 'public',
-                name: 'configure',
-                args: [],
-                return: 'void',
-            )
-            ->withMethod(
-                typeFunction: 'public',
-                name: 'execute',
-                args: [],
-                return: 'int',
-                content: "\treturn 0;"
-            )
-            ->withArgument('execute', '', 'input')
-            ->withArgument('execute', '', 'output')
-            ->generate()
-            ->save($file);
+        $state = CommandGenerator::make($className,$savePath);
 
         if ($state) {
             $io->success('File created successfully!');

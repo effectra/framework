@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\Controller;
 
 use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Generator\ControllerApiGenerator;
 use Effectra\Core\Generator\ControllerGenerator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
@@ -23,10 +24,10 @@ class GenerateController extends Command
         $this->setName('controller:make')
             ->setDescription('Generate Controller class file')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Controller')
-            ->addOption('crud', 'crud', InputOption::VALUE_OPTIONAL, 'generate controller with crud methods')
-            ->addOption('api', 'api', InputOption::VALUE_OPTIONAL, 'generate controller with api crud methods')
-            ;
+            ->addOption('crud', 'crud', InputOption::VALUE_NONE, 'generate controller with crud methods')
+            ->addOption('api', 'api', InputOption::VALUE_NONE, 'generate controller with api crud methods');
     }
+
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -50,21 +51,16 @@ class GenerateController extends Command
         $io->text('Generate: ' . $savePath);
 
         if (File::exists($savePath)) {
-            $io->warring('File exists !');
+            $io->warning('File exists !');
             return 0;
         }
 
-
         $option = [];
 
-        if($input->getOption('crud')){
-            $option['type'] = 'crud';
-        }
-        if($input->getOption('api')){
-            $option['type'] = 'api';
-        }
-        else {
-            $state = ControllerGenerator::make($className,$savePath,$option);
+        if ($input->getOption('api')) {
+            $state = ControllerApiGenerator::make($className, $savePath, $option);
+        } else {
+            $state = ControllerGenerator::make($className, $savePath, $option);
         }
 
         if ($state) {

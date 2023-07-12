@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * The ModelBase trait provides common database operations for models.
  */
-trait ModelBase
+trait ModelBase 
 {
     /**
      * Get the database instance.

@@ -110,6 +110,16 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     }
 
     /**
+     * Returns an array containing only the input data for the specified input keys.
+     * @param array $items An array of input keys to include in the result.
+     * @return array
+     */
+    public function only(array $items): static
+    {
+        $arr = array_intersect_key((array) $items, array_flip($this->items));
+        return new static($arr);
+    }
+    /**
      * Get the number of items in the collection.
      *
      * @return int The number of items in the collection.

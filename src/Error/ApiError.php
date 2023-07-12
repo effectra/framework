@@ -3,12 +3,17 @@
 namespace Effectra\Core\Error;
 
 use Effectra\Core\Response;
+use Effectra\Http\Foundation\ResponseFoundation;
+use Exception;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * The ApiError class handles errors and exceptions in an API context.
  */
 class ApiError
 {
+    public ?ResponseInterface $errorResponse = null;
+    public array $errors = [];
     /**
      * Register the error and exception handlers.
      *
@@ -18,6 +23,24 @@ class ApiError
     {
         set_error_handler([$this, 'handleError']);
         set_exception_handler([$this, 'handleException']);
+    }
+
+    
+    private function response()
+    {
+        $response = (new Response())->json(array_reverse($this->errors));
+
+        ResponseFoundation::send($response);
+    }
+
+    private function record($message)
+    {
+        $this->errors[] = $message;
+    }
+
+    public function getErrorResponse()
+    {
+        return $this->errorResponse;
     }
 
     /**
@@ -38,7 +61,7 @@ class ApiError
             'line' => $errline
         ];
 
-        $this->response($errorData);
+        $this->record($errorData);
     }
 
     /**
@@ -47,16 +70,22 @@ class ApiError
      * @param \Exception $exception The exception object.
      * @return void
      */
-    public function handleException($exception)
+    public function handleException(Exception $exception):void
     {
+        $names = explode('\\', get_class($exception));
+        $type =  end($names);
         $errorData = [
-            'type' => get_class($exception),
+            'type' => $type,
+            'exception_class' => get_class($exception),
             'message' => $exception->getMessage(),
+            'code' => $exception->getCode(),
             'file' => $exception->getFile(),
-            'line' => $exception->getLine()
+            'line' => $exception->getLine(),
+            'trace'=>$exception->getTrace(),
         ];
 
-        $this->response($errorData);
+        $this->record($errorData);
+        $this->response();
     }
 
     /**
@@ -86,16 +115,5 @@ class ApiError
         ];
 
         return $errorTypes[$errno] ?? 'Unknown error';
-    }
-
-    /**
-     * Send a JSON response with the error message.
-     *
-     * @param mixed $message The error message or data.
-     * @return \Effectra\Core\Response The response object.
-     */
-    private function response($message)
-    {
-        return (new Response())->json($message);
     }
 }

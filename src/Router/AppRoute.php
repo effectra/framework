@@ -99,17 +99,25 @@ class AppRoute
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $uri = new Uri($_ENV['APP_URL']);
-
-        $requestUri = $request->getUri();
-
-        $newPath = str_replace($uri->getPath(),'',$requestUri->getPath());
-
-        if($newPath === ''){
-            $newPath = '/';
+        
+        if(method_exists($this->router,'setContainer')){
+            $this->router->setContainer(Application::container());
         }
 
-        $request = $request->withUri($uri->withPath($newPath));
+        if(isset($_ENV['APP_URL'])){
+            $uri = new Uri($_ENV['APP_URL']);
+
+            $requestUri = $request->getUri();
+    
+            $newPath = str_replace($uri->getPath(),'',$requestUri->getPath());
+    
+            if($newPath === ''){
+                $newPath = '/';
+            }
+
+            $request = $request->withUri($uri->withPath($newPath));
+        }
+
 
         if (Application::isApiPath($request)) {
             $this->router->setNotFound(function () {

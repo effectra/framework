@@ -10,6 +10,7 @@ use Effectra\Config\ConfigFile;
 use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Error\AppError;
 use Effectra\Core\Http\Cors;
+use Effectra\Core\Middlewares\AppMiddlewares;
 use Effectra\Core\Router\AppRoute;
 use Effectra\Core\Server\DurationCalculator;
 use Effectra\Fs\Path;
@@ -244,7 +245,9 @@ class Application
      */
     public function getMiddlewares(string $type = 'web'): array
     {
-        return array_map(fn ($middleware) => new $middleware, $this->appCore->middlewares[$type]);
+        $appCoreMiddlewares =  array_map(fn ($middleware) => new $middleware, $this->appCore->middlewares[$type]);
+        $middlewares = array_merge($appCoreMiddlewares,AppMiddlewares::get($type));
+        return $middlewares;
     }
 
     /**
@@ -270,8 +273,9 @@ class Application
 
         AppError::endpoint($request);
 
+        $typeEndpoint = $this->isApiPath($request) ? 'api' : 'web';
         // Handle Errors
-        AppError::handler();
+        AppError::handler($typeEndpoint);
 
         // Handle Middlewares
         $middlewares = $this->getMiddlewares();

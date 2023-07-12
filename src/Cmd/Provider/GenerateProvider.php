@@ -45,7 +45,7 @@ class GenerateProvider extends Command
         $io->text('Generate: ' . $savePath);
 
         if (File::exists($savePath)) {
-            $io->warring('File exists !');
+            $io->warning('File exists !');
             return 0;
         }
 

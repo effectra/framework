@@ -9,8 +9,6 @@ use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\MiddlewareGenerator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
-use Effectra\Generator\Creator;
-use Effectra\Http\Server\GenerateMiddleware as ServerGenerateMiddleware;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -48,7 +46,7 @@ class GenerateMiddleware extends Command
         $io->text('Generate: ' . $savePath);
 
         if (File::exists($savePath)) {
-            $io->warring('File exists !');
+            $io->warning('File exists !');
             return 0;
         }
 

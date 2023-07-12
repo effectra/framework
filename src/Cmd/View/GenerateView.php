@@ -53,7 +53,7 @@ class GenerateView extends Command
         $io->text('Generate: '.$file);
 
         if(File::exists($file)){
-            $io->warring('File exists !');
+            $io->warning('File exists !');
             return 0;
         }
 

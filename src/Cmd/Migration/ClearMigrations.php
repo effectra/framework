@@ -34,7 +34,7 @@ class ClearMigrations extends Command
         $io->text('Delete dirictory files: '.$file);
 
         if(!File::exists($file)){
-            $io->warring('File does not exists !');
+            $io->warning('File does not exists !');
             return 0;
         }
 

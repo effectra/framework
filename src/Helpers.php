@@ -2,6 +2,7 @@
 
 use Effectra\Core\Application;
 use Effectra\Core\Client;
+use Effectra\Core\Facades\Localization;
 use Effectra\Core\Facades\View;
 use Effectra\Core\Response;
 use Effectra\Core\View as CoreView;
@@ -168,6 +169,14 @@ if (!function_exists('now')) {
     function now(): string
     {
         return date('Y-m-d H:i:s');
+    }
+}
+
+
+if (!function_exists('translate')) {
+    function translate(string $key)
+    {
+        return Localization::translate($key);
     }
 }
 
