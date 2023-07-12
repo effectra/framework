@@ -14,6 +14,7 @@ class ApiError
 {
     public ?ResponseInterface $errorResponse = null;
     public array $errors = [];
+
     /**
      * Register the error and exception handlers.
      *
@@ -25,19 +26,33 @@ class ApiError
         set_exception_handler([$this, 'handleException']);
     }
 
-    
+    /**
+     * Send the error response.
+     *
+     * @return void
+     */
     private function response()
     {
         $response = (new Response())->json(array_reverse($this->errors));
-
         ResponseFoundation::send($response);
     }
 
+    /**
+     * Record the error message.
+     *
+     * @param string $message The error message.
+     * @return void
+     */
     private function record($message)
     {
         $this->errors[] = $message;
     }
 
+    /**
+     * Get the error response.
+     *
+     * @return ResponseInterface|null The error response.
+     */
     public function getErrorResponse()
     {
         return $this->errorResponse;
@@ -73,7 +88,7 @@ class ApiError
     public function handleException(Exception $exception):void
     {
         $names = explode('\\', get_class($exception));
-        $type =  end($names);
+        $type = end($names);
         $errorData = [
             'type' => $type,
             'exception_class' => get_class($exception),
@@ -81,7 +96,7 @@ class ApiError
             'code' => $exception->getCode(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace'=>$exception->getTrace(),
+            'trace' => $exception->getTrace(),
         ];
 
         $this->record($errorData);
