@@ -271,8 +271,6 @@ class Application
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
 
-        AppError::endpoint($request);
-
         $typeEndpoint = $this->isApiPath($request) ? 'api' : 'web';
         // Handle Errors
         AppError::handler($typeEndpoint);
@@ -280,7 +278,7 @@ class Application
         // Handle Middlewares
         $middlewares = $this->getMiddlewares();
 
-        if ($this->isApiPath($request)) {
+        if ($typeEndpoint === 'api') {
             $middlewares = $this->getMiddlewares('api');
         }
 
