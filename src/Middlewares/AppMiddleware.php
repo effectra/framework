@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Middlewares;
 
 /**
- * Class AppMiddlewares
+ * Class AppMiddleware
  *
  * The class that provides a list of middlewares for different application types.
  */
