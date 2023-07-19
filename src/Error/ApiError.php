@@ -33,7 +33,7 @@ class ApiError
      */
     private function response()
     {
-        $response = (new Response())->json(array_reverse($this->errors));
+        $response = (new Response())->json(array_reverse($this->errors),500);
         ResponseFoundation::send($response);
     }
 
@@ -80,23 +80,23 @@ class ApiError
     }
 
     /**
-     * Handle PHP exceptions.
+     * Handle PHP errors and exceptions.
      *
-     * @param \Exception $exception The exception object.
+     * @param \Exception|\Error $error  The error object.
      * @return void
      */
-    public function handleException(Exception $exception):void
+    public function handleException(Exception|\Error $error):void
     {
-        $names = explode('\\', get_class($exception));
+        $names = explode('\\', get_class($error));
         $type = end($names);
         $errorData = [
             'type' => $type,
-            'exception_class' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'code' => $exception->getCode(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'trace' => $exception->getTrace(),
+            'error_class' => get_class($error),
+            'message' => $error->getMessage(),
+            'code' => $error->getCode(),
+            'file' => $error->getFile(),
+            'line' => $error->getLine(),
+            'trace' => $error->getTrace(),
         ];
 
         $this->record($errorData);

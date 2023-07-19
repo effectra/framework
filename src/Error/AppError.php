@@ -37,15 +37,6 @@ class AppError
      */
     public static function handler($type = 'web')
     {
-        if ($type === 'web') {
-            WoopsException::handle();
-        } elseif ($type === 'api') {
-            $apiError = new ApiError();
-            $apiError->register();
-        } elseif ($type !== 'cli') {
-            return ;
-        }
-
         $config = static::getConfig();
 
         if (!$config['display']) {
@@ -53,6 +44,17 @@ class AppError
             ini_set('display_errors', '0');
             $logger = new ErrorLogger();
             $logger->register();
+        }
+
+        if ($type === 'web') {
+            WoopsException::handle();
+        } elseif ($type === 'api') {
+            $apiError = new ApiError();
+            $apiError->register();
+        } elseif ($type !== 'cli') {
+            $logger = new ErrorLogger();
+            $logger->register();
+            return;
         }
     }
 }

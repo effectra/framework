@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Auth;
 
-use Effectra\Core\Application;
-use Effectra\Database\DB;
 use Effectra\SqlQuery\Query;
 
 /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Auth;
 
 use App\Models\User;
+use Effectra\Core\Contracts\AuthInterface;
 use Effectra\Core\Facades\Token;
 use Effectra\Security\Hash;
 

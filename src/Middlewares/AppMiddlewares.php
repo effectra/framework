@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Middlewares;
 
-use App\Middlewares\CsrfFieldsMiddleware;
 /**
  * Class AppMiddlewares
  *
  * The class that provides a list of middlewares for different application types.
  */
-class AppMiddlewares
+class AppMiddleware
 {
     /**
      * Get the list of middlewares based on the specified type.
