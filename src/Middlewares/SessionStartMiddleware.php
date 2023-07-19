@@ -15,7 +15,9 @@ class SessionStartMiddleware extends Middleware implements MiddlewareInterface
 	
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		session()->start();
+		if(!session()->isActive()){
+			session()->start();
+		}
 		return $handler->handle($request);
 	}
 }
