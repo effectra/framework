@@ -9,14 +9,20 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Effectra\Session\Contracts\SessionInterface;
+use Effectra\Session\Session;
+
 
 class SessionStartMiddleware extends Middleware implements MiddlewareInterface
 {
+	public function __construct(protected Session $session) {
+	}
 	
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		if(!session()->isActive()){
-			session()->start();
+		 
+		if(!$this->session->isActive()){
+			$this->session->start();
 		}
 		return $handler->handle($request);
 	}

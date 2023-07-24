@@ -18,7 +18,7 @@ class DropTable extends Command
     protected function configure()
     {
         $this->setName('db:drop')
-            ->setDescription('Run migrations')
+            ->setDescription('Drop database table')
             ->addArgument('table', InputArgument::REQUIRED, 'The name of the table you want dropped');
     }
 
@@ -41,7 +41,7 @@ class DropTable extends Command
             $io->success('Table dropped successfully!');
         }
         if ($state === false) {
-            $errorMessage = 'Failed  droping the table.';
+            $errorMessage = 'Failed dropping the table';
             
             $io->errorMsg($errorMessage);
         }

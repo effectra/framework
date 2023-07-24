@@ -23,9 +23,10 @@ class AppRoute
 
     /** 
      * @param Route $router The router instance.
+     * @param string $endpoint define type of endpoint
      * @return void
      */
-    public function __construct(protected Route $router)
+    public function __construct(protected Route $router,protected string $endpoint)
     {
     }
 
@@ -118,8 +119,7 @@ class AppRoute
             $request = $request->withUri($uri->withPath($newPath));
         }
 
-
-        if (Application::isApiPath($request)) {
+        if ($this->endpoint === 'api') {
             $this->router->setNotFound(function () {
                 return response()->json([
                     'message' => 'The requested resource was not found on this server.'

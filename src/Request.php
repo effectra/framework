@@ -29,7 +29,7 @@ class Request extends RequestExtension
      */
     public static function convertRequest(ServerRequestInterface $request): static
     {
-        return new static(
+        $new = new static(
             $request->getMethod(),
             $request->getUri(),
             $request->getHeaders(),
@@ -39,6 +39,8 @@ class Request extends RequestExtension
             $request->getParsedBody(),
             $request->getAttributes()
         );
+        $new = $new->withUploadedFiles($request->getUploadedFiles());
+        return $new;
     }
 
     /**

@@ -8,6 +8,7 @@ use App\AppCore;
 use DI\Container;
 use Effectra\Config\ConfigFile;
 use Effectra\Core\Console\AppConsole;
+use Effectra\Core\Container\DiClasses;
 use Effectra\Core\Error\AppError;
 use Effectra\Core\Http\Cors;
 use Effectra\Core\Middlewares\AppMiddleware;
@@ -104,7 +105,8 @@ class Application
         return $config;
     }
 
-    public static function getLang() : string {
+    public static function getLang(): string
+    {
         return static::getConfig()['lang'] ?? 'en';
     }
 
@@ -245,9 +247,13 @@ class Application
      */
     public function getMiddlewares(string $type = 'web'): array
     {
-        $appCoreMiddlewares =  array_map(fn ($middleware) => new $middleware, $this->appCore->middlewares[$type]);
-        $middlewares = array_merge($appCoreMiddlewares,AppMiddleware::get($type));
-        return $middlewares;
+        $middlewares = $this->appCore->middlewares[$type] + AppMiddleware::get($type);
+
+        $middlewaresInstant=  array_map(function ($middleware) {
+            return DiClasses::load($middleware);
+        }, $middlewares);
+       
+        return $middlewaresInstant;
     }
 
     /**
@@ -271,27 +277,31 @@ class Application
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
 
+
         $typeEndpoint = $this->isApiPath($request) ? 'api' : 'web';
         // Handle Errors
         AppError::handler($typeEndpoint);
 
         // Handle Middlewares
-        $middlewares = $this->getMiddlewares();
 
         if ($typeEndpoint === 'api') {
             $middlewares = $this->getMiddlewares('api');
+        } else {
+            $middlewares = $this->getMiddlewares();
         }
 
+       
         $response = new Response();
 
         $request = Request::convertRequest($request);
+        
 
         $handler = new RequestHandler($response, $middlewares);
 
         $response = $handler->handle($request);
 
         // Handle Router
-        $router = new AppRoute(new Route());
+        $router = new AppRoute(new Route(), $typeEndpoint);
 
         // Set Request & Response for controller
         $router->set(

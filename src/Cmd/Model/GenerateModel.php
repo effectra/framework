@@ -6,12 +6,11 @@ namespace Effectra\Core\Cmd\Model;
 
 use Bmt\PluralConverter\PluralConverter;
 use Effectra\Core\Application;
+use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ModelGenerator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
-use Effectra\Generator\Creator;
-use Effectra\Generator\GeneratorClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -67,10 +66,10 @@ class GenerateModel extends Command
         }
 
         if ($input->getOption('migration')) {
-            exec('php aval migration:make create_table_' . $tableName . ' --table=' . $tableName);
+            AppConsole::print('php aval migration:make create_table_' . $tableName . ' --table=' . $tableName);
         }
         if ($input->getOption('controller')) {
-            exec('php aval controller:make ' . $className);
+            AppConsole::print('php aval controller:make ' . $className);
         }
 
         return 0;

@@ -46,6 +46,7 @@ class AppConsole
      * Register the console commands.
      *
      * @throws Exception When no classes are added.
+     * @return void
      */
     public function register()
     {
@@ -82,5 +83,21 @@ class AppConsole
         }
 
         echo "\n Console App disabled !\n";
+    }
+
+    /**
+     * Execute the given command and print the output with styling.
+     *
+     * @param string $command The command to execute.
+     */
+    public static function print(string $command): void
+    {
+        $output = [];
+        exec($command, $output);
+
+        // Display the output with styling
+        foreach ($output as $line) {
+            echo $line . PHP_EOL;
+        }
     }
 }

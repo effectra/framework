@@ -19,6 +19,8 @@ trait ConsoleLogTrait
      */
     public function __call(string $name, array $arguments)
     {
+        echo self::class . ' Class running in console';
         Application::log()->info(self::class . ' Class running in console');
     }
+    
 }

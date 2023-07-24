@@ -59,18 +59,18 @@ class ViewConfigs
         return [
             ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
             ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME],
-            ['WEB_ENCORE_JS' => function ($webpackEncore) {
+            ['WEB_ENCORE_JS' => function () {
                 try {
                     $webpackEncore = new WebpackEncore();
-                    $webpackEncore->scriptTags('app');
+                  return  $webpackEncore->scriptTags('app');
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_JS error('. $e->getMessage() .')';
                 }
             }],
-            ['WEB_ENCORE_CSS' => function ($webpackEncore) {
+            ['WEB_ENCORE_CSS' => function () {
                 try {
                     $webpackEncore = new WebpackEncore();
-                    $webpackEncore->linkTags('app');
+                  return  $webpackEncore->linkTags('app');
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';
                 }

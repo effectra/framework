@@ -52,7 +52,13 @@ if (!function_exists('database_path')) {
         return Application::databasePath('schema' . Path::ds() . $db);
     }
 }
+if (!function_exists('public_path')) {
 
+    function public_path(string $subfolder = ''): string
+    {
+        return Application::publicPath($subfolder);
+    }
+}
 if (!function_exists('app_path')) {
 
     function app_path(string $path = ''): string

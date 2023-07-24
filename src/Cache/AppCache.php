@@ -58,6 +58,10 @@ class AppCache
 
         $driver = $config['driver'][$defaultDriver];
 
+        if($defaultDriver !== 'redis'){
+            $driver = $defaultDriver;
+        }
+
         if (!isset($driver)) {
             throw new \Exception("Error Processing Driver");
         }
@@ -74,7 +78,8 @@ class AppCache
             return new RedisCache();
         }
 
-        return null;
+        throw new \Exception('Cache driver not setup yet');
+        
     }
 
     /**

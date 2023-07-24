@@ -21,8 +21,8 @@ class AppMiddleware
     {
         $middlewares = [
             'web' => [
-                new SessionStartMiddleware(),
-                new CsrfFieldsMiddleware(),
+                 SessionStartMiddleware::class,
+                 CsrfFieldsMiddleware::class,
             ],
             'api' => []
         ];

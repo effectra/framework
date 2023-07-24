@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Server;
 
+use Effectra\Core\Console\AppConsole;
+
 class AppServer
 {
     /**
@@ -25,14 +27,7 @@ class AppServer
         }
         
         $command = sprintf("php -S %s:%s -t public/", static::$HOST_NAME, $port);
-        $output = [];
-        exec($command, $output);
-        
-        // Display the output with styling
-        foreach ($output as $line) {
-            $formattedLine = '[' . date('Y-m-d H:i:s') . ']......................................' . $line;
-            echo "\033[0;36m$formattedLine\033[0m" . PHP_EOL;
-        }
+        AppConsole::print($command);
     }
 
     /**
