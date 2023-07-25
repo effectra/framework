@@ -30,6 +30,7 @@ class Scan extends Command
 
         try {
             $s->scan();
+            $s->declareMissedDirectory();
         } catch (StructureException $e) {
             $io->errorMsg($e->getMessage());
         }

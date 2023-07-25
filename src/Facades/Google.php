@@ -1,5 +1,7 @@
 <?php 
 
+declare(strict_types=1);
+
 namespace Effectra\Core\Facades;
 
 use Effectra\Core\Application;
