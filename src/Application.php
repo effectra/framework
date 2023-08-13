@@ -276,8 +276,6 @@ class Application
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-
-
         $typeEndpoint = $this->isApiPath($request) ? 'api' : 'web';
         // Handle Errors
         AppError::handler($typeEndpoint);
@@ -294,7 +292,6 @@ class Application
         $response = new Response();
 
         $request = Request::convertRequest($request);
-        
 
         $handler = new RequestHandler($response, $middlewares);
 

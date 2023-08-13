@@ -7,6 +7,7 @@ namespace Effectra\Core\Database;
 use Effectra\Config\ConfigFile;
 use Effectra\Core\Application;
 use Effectra\Core\Facades\DB;
+use Effectra\Database\Connection;
 use Effectra\Fs\File;
 use Effectra\SqlQuery\Query;
 use PDOException;
@@ -106,13 +107,15 @@ class AppDatabase
     /**
      * Check if a database exists.
      *
-     * @param string $name The name of the database.
      * @return bool True if the database exists, false otherwise.
      */
-    public static function checkDatabase($name): bool
+    public static function checkDatabase(): bool
     {
+        $driver = static::getDriverDefault();
+        $config = static::getDriver($driver);
+
         try {
-            return (bool) DB::withQuery(Query::describe($name))->run();
+            return (bool) DB::withQuery(Query::describe($config['database']))->run();
         } catch (PDOException $e) {
             return false;
         }
@@ -133,5 +136,12 @@ class AppDatabase
             return static::makeDatabaseSqlite();
         }
         return false;
+    }
+
+    public static function connect(): Connection
+    {
+        $driver = static::getDriverDefault();
+        $config = static::getDriver($driver);
+        return new Connection($driver, $config);
     }
 }

@@ -10,7 +10,7 @@ use Effectra\Core\Contracts\ProviderInterface;
 use Effectra\Core\Contracts\ServiceInterface;
 use Effectra\Core\Localization;
 
-class LocalizationProvider  extends ServiceProvider implements ServiceInterface
+class LocalizationProvider extends ServiceProvider implements ServiceInterface
 {
     public function register(ProviderInterface $provider)
     {

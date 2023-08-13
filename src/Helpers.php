@@ -2,10 +2,10 @@
 
 use Effectra\Core\Application;
 use Effectra\Core\Client;
-use Effectra\Core\Facades\Localization;
-use Effectra\Core\Facades\View;
+use Effectra\Core\Localization;
+use Effectra\Core\Request;
 use Effectra\Core\Response;
-use Effectra\Core\View as CoreView;
+use Effectra\Core\View;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\Fs\Type\Json;
@@ -13,6 +13,7 @@ use Effectra\Mail\MailerService;
 use Effectra\Router\Route;
 use Effectra\Session\Session;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 if (!function_exists('env')) {
     /**
@@ -40,11 +41,28 @@ if (!function_exists('app')) {
 
 if (!function_exists('response')) {
 
-    function response($statusCode = 200, array $headers = [], $body = '', $version = '1.1', $reasonPhrase = 'OK'): Response
+    function response(int $statusCode = 200, array $headers = [], $body = '',string $version = '1.1',string $reasonPhrase = 'OK'): Response
     {
         return new Response(...func_get_args());
     }
 }
+
+if (!function_exists('request')) {
+
+    function request(
+        string $method,
+        UriInterface $uri,
+        array $headers = [],
+        $body = '',
+        string $protocolVersion = '1.1',
+        array $queryParams = [],
+        $parsedBody = null,
+        array $attributes = []
+    ): Request {
+        return new Request(...func_get_args());
+    }
+}
+
 if (!function_exists('database_path')) {
 
     function database_path(string $db = ''): string
@@ -70,13 +88,12 @@ if (!function_exists('app_path')) {
 if (!function_exists('appSnakeName')) {
     function appSnakeName(): string
     {
-        //replace this  $_ENV['APP_NAME']
-        return strtolower(str_replace(' ', '_', 'effectra'));
+        return strtolower(str_replace(' ', '_', $_ENV['APP_NAME']));
     }
 }
 
-if (!function_exists('generateGuid')) {
-    function generateGuid($customKey = '')
+if (!function_exists('generate_guid')) {
+    function generate_guid($customKey = '')
     {
         $hash = md5(uniqid($customKey, true));
 
@@ -112,7 +129,7 @@ if (!function_exists('session')) {
 if (!function_exists('view')) {
     function view(string $view, $data = [])
     {
-        $viewClass = Application::container()->get(CoreView::class);
+        $viewClass = Application::container()->get(View::class);
         return $viewClass->render($view, $data);
     }
 }
@@ -146,8 +163,8 @@ if (!function_exists('import')) {
     }
 }
 
-if (!function_exists('importJson')) {
-    function importJson($file, $associative = null)
+if (!function_exists('import_json')) {
+    function import_json($file, $associative = null)
     {
         $path = Application::storagePath('imports') . Path::ds() . $file . '.json';
         return Json::decode($path, $associative);
@@ -162,8 +179,8 @@ if (!function_exists('export')) {
     }
 }
 
-if (!function_exists('exportJson')) {
-    function exportJson($fileName, $content, $lock = false): int|false
+if (!function_exists('export_json')) {
+    function export_json($fileName, $content, $lock = false): int|false
     {
         $path = Application::storagePath('exports') . Path::ds() . $fileName . '.json';
         return File::put($path, $content, $lock);
@@ -180,9 +197,13 @@ if (!function_exists('now')) {
 
 
 if (!function_exists('translate')) {
-    function translate(string $key)
+    function translate(string $key, ?string $lang = null): string
     {
-        return Localization::translate($key);
+        if (!$lang) {
+            $lang = Application::getLang();
+        }
+        $localization = new Localization($lang);
+        return $localization->translate($key);
     }
 }
 

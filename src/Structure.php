@@ -6,6 +6,7 @@ namespace Effectra\Core;
 
 use Effectra\Core\Exceptions\StructureException;
 use Effectra\Fs\Directory;
+use Effectra\Fs\Path;
 
 /**
  * Class Structure
@@ -72,44 +73,44 @@ class Structure
      *
      * @return bool True if the application structure is valid, False if there are missing directories.
      */
-    public function scan():bool
+    public function scan(): bool
     {
         // Scan the main directories
-        foreach (Directory::directories(Application::appPath()) as $dir) {
-            if (!Directory::isDirectory($dir)) {
-                $this->missedDir[] = Application::appPath() . $dir;
+        foreach (static::$main as $dir) {
+            if (!Directory::isDirectory(Application::appPath($dir))) {
+                $this->missedDir[] = Application::appPath($dir);
             }
         }
 
         // Scan the 'app' directory subdirectories
-        foreach (Directory::directories(Application::appPath('app')) as $dir) {
-            if (!Directory::isDirectory($dir)) {
-                $this->missedDir[] = Application::appPath('app') . $dir;
+        foreach (static::$appDir as $dir) {
+            if (!Directory::isDirectory(Application::appPath('app' . Path::ds() . $dir))) {
+                $this->missedDir[] = Application::appPath('app' . Path::ds() . $dir);
             }
         }
 
         // Scan the 'database' directory subdirectories
-        foreach (Directory::directories(Application::databasePath()) as $dir) {
-            if (!Directory::isDirectory($dir)) {
-                $this->missedDir[] = Application::databasePath() . $dir;
+        foreach (static::$databaseDir as $dir) {
+            if (!Directory::isDirectory(Application::databasePath($dir))) {
+                $this->missedDir[] = Application::databasePath($dir);
             }
         }
 
         // Scan the 'storage' directory subdirectories
-        foreach (Directory::directories(Application::storagePath()) as $dir) {
-            if (!Directory::isDirectory($dir)) {
-                $this->missedDir[] = Application::storagePath() . $dir;
+        foreach (static::$storageDir as $dir) {
+            if (!Directory::isDirectory(Application::storagePath($dir))) {
+                $this->missedDir[] = Application::storagePath($dir);
             }
         }
 
         // Scan the 'resources' directory subdirectories
-        foreach (Directory::directories(Application::resourcesPath()) as $dir) {
-            if (!Directory::isDirectory($dir)) {
-                $this->missedDir[] = Application::resourcesPath() . $dir;
+        foreach (static::$resourcesDir as $dir) {
+            if (!Directory::isDirectory(Application::resourcesPath($dir))) {
+                $this->missedDir[] = Application::resourcesPath($dir);
             }
         }
 
-        if(count($this->missedDir) == 0){
+        if (count($this->missedDir) == 0) {
             return true;
         }
 
@@ -123,14 +124,14 @@ class Structure
      */
     public function declareMissedDirectory(): void
     {
-        $dirs = join(', ', $this->missedDir);
-        throw new StructureException("Directory '$dirs' is missing.");
+        $dirs = array_map(fn($dir) => " $dir\n", $this->missedDir);
+        throw new StructureException("Directory is missing:\n\n" . implode(' ', $dirs));
     }
 
     /**
      * Builds the missing directories in the application structure.
      */
-    public function buildFrameworkDirectories():void
+    public function buildFrameworkDirectories(): void
     {
         foreach ($this->missedDir as $dir) {
             Directory::make($dir);
@@ -142,7 +143,7 @@ class Structure
      *
      * @return array The list of missing directories.
      */
-    public function getMissedDirectories():array
+    public function getMissedDirectories(): array
     {
         return $this->missedDir;
     }

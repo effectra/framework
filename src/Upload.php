@@ -119,12 +119,12 @@ class Upload
 
         foreach ($this->files as $key => $file) {
 
-            if (!in_array(File::extension($file), AppUpload::getTypes())) {
+            if (!in_array(File::extension($file->getClientFilename()), AppUpload::getTypes())) {
                 throw new UploadException("This Format Type '" . File::extension($file) . "' not allowed");
             }
 
-            if($file->getSize() > AppUpload::getMaxSize()){
-                throw new UploadException("This Format Type '" . File::extension($file) . "' not allowed");
+            if ($file->getSize() > AppUpload::getMaxSize()) {
+                throw new UploadException("Max uploading size is " . AppUpload::getMaxSize() . ", you file size is " . $file->getSize());
             }
 
             $fileName =  $this->prename . $file->getClientFilename();
@@ -147,7 +147,7 @@ class Upload
                 'extension'      => File::exists($distention) ? File::extension($distention) : null,
                 'media_type'     => $file->getClientMediaType(),
                 'size'           => $file->getSize(),
-                'size_format'           => $this->formatBytes($file->getSize()),
+                'size_format'    => $this->formatBytes($file->getSize()),
                 'error'          => $this->error($file->getError()),
             ];
         }
@@ -175,7 +175,7 @@ class Upload
         if (!Directory::isDirectory($path)) {
             $result = Directory::make($path);
             if ($result === false) {
-                throw new UploadException("Failed to make directory at $path");
+                throw new UploadException("Failed making directory at: $path");
             }
         }
     }
@@ -227,4 +227,5 @@ class Upload
 
         return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
     }
+
 }

@@ -27,6 +27,6 @@ class Cache
      */
     public function __call(string $name, array $arguments)
     {
-        throw new \BadMethodCallException('Method ' . $name . '() is not implemented.');
+        throw new \BadMethodCallException("Method Cache:: $name() is not implemented.");
     }
 }

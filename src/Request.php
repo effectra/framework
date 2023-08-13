@@ -40,6 +40,7 @@ class Request extends RequestExtension
             $request->getAttributes()
         );
         $new = $new->withUploadedFiles($request->getUploadedFiles());
+        $new = $new->withCookieParams($request->getCookieParams());
         return $new;
     }
 
@@ -78,4 +79,5 @@ class Request extends RequestExtension
         $data = $this->inputs();
         return new Validator($data);
     }
+    
 }

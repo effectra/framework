@@ -31,8 +31,12 @@ class Scan extends Command
         try {
             $s->scan();
             $s->declareMissedDirectory();
+
+            if(empty($s->getMissedDirectories())){
+                $io->success('No Directory is missed');
+            }
         } catch (StructureException $e) {
-            $io->errorMsg($e->getMessage());
+            $io->errorMsg( $e->getMessage());
         }
 
         return 0;

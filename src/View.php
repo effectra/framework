@@ -64,7 +64,7 @@ class View
             $this->reader
         ))->send();
 
-        return Minify::html($content);
+        return $content;
     }
 
     /**

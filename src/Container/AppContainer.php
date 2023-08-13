@@ -7,6 +7,7 @@ use DI\ContainerBuilder;
 use Effectra\Core\Application;
 use Effectra\Core\Container\Provider;
 use Effectra\Fs\Directory;
+use Effectra\Fs\Path;
 
 /**
  * The application container for managing dependency injection and service providers.
@@ -48,6 +49,7 @@ class AppContainer
     public function __construct()
     {
         $this->containerBuilder = new ContainerBuilder();
+        
     }
 
     /**
@@ -79,8 +81,16 @@ class AppContainer
      */
     public function build(): void
     {
+        $cache_dir = Application::appPath('bootstrap' . Path::ds() . 'cache' .  Path::ds() );
+        
+        $this->containerBuilder->enableCompilation($cache_dir);
+        $this->containerBuilder->writeProxiesToFile(true, $cache_dir . '/proxies');
+
+
         $this->registerProviders();
+
         $this->containerBuilder->addDefinitions($this->containerBindings);
+
         $this->container = $this->containerBuilder->build();
     }
 
@@ -147,7 +157,7 @@ class AppContainer
      *
      * @return void
      */
-    public function bindAppClasses()
+    public function bindAppClasses(): void
     {
         $controllers = Application::appPath('Controllers');
         foreach (Directory::files($controllers) as $controller) {

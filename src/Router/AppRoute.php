@@ -110,7 +110,7 @@ class AppRoute
 
             $requestUri = $request->getUri();
     
-            $newPath = str_replace($uri->getPath(),'',$requestUri->getPath());
+            $newPath = str_replace($uri->getPath(),'/',$requestUri->getPath());
     
             if($newPath === ''){
                 $newPath = '/';
