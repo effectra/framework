@@ -26,7 +26,6 @@ class GenerateKey extends Command
     {
 
         $command = implode(' ', array_slice($_SERVER['argv'], 1));
-        dd($command);
 
         $io = new ConsoleBlock($input, $output);
 
