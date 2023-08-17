@@ -2,10 +2,12 @@
 
 use Effectra\Core\Application;
 use Effectra\Core\Client;
+use Effectra\Core\Database\AppDatabase;
 use Effectra\Core\Localization;
 use Effectra\Core\Request;
 use Effectra\Core\Response;
 use Effectra\Core\View;
+use Effectra\Database\DB;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\Fs\Type\Json;
@@ -39,9 +41,16 @@ if (!function_exists('app')) {
     }
 }
 
+if (!function_exists('app_key')) {
+    function app_key(): string
+    {
+        return env('APP_KEY');
+    }
+}
+
 if (!function_exists('response')) {
 
-    function response(int $statusCode = 200, array $headers = [], $body = '',string $version = '1.1',string $reasonPhrase = 'OK'): Response
+    function response(int $statusCode = 200, array $headers = [], $body = '', string $version = '1.1', string $reasonPhrase = 'OK'): Response
     {
         return new Response(...func_get_args());
     }
@@ -195,6 +204,16 @@ if (!function_exists('now')) {
     }
 }
 
+if (!function_exists('database')) {
+    function database(): DB
+    {
+        $conn = AppDatabase::connect();
+
+        $db = new DB($conn->connect());
+
+        return $db;
+    }
+}
 
 if (!function_exists('translate')) {
     function translate(string $key, ?string $lang = null): string
