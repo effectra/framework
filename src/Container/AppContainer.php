@@ -81,10 +81,13 @@ class AppContainer
      */
     public function build(): void
     {
-        $cache_dir = Application::appPath('bootstrap' . Path::ds() . 'cache' .  Path::ds() );
-        
-        $this->containerBuilder->enableCompilation($cache_dir);
-        $this->containerBuilder->writeProxiesToFile(true, $cache_dir . '/proxies');
+
+        // $cache_dir = Application::appPath('bootstrap' . Path::ds() . 'cache' .  Path::ds() );
+        /**
+         * if you uncomment this line database operations not be working
+         */
+        // $this->containerBuilder->enableCompilation($cache_dir);
+        // $this->containerBuilder->writeProxiesToFile(true, $cache_dir . '/proxies');
 
 
         $this->registerProviders();

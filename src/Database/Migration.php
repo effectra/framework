@@ -5,15 +5,31 @@ declare(strict_types=1);
 namespace Effectra\Core\Database;
 
 use Effectra\Core\Application;
+use Effectra\Core\Container\DiClasses;
 use Effectra\Core\Facades\DB;
 use Effectra\Fs\Directory;
+use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\SqlQuery\Query;
 use Effectra\SqlQuery\Table;
 
 class Migration
 {
+    /**
+     * @var array $appliedMigrations the applied migration.
+     */
     protected array $appliedMigrations = [];
+
+    /**
+     * @var bool $migrated 
+     */
+    protected bool $migrated = false;
+
+
+    public function dir(): string
+    {
+        return Application::databasePath('migrations');
+    }
 
     /**
      * Apply migrations.
@@ -21,32 +37,35 @@ class Migration
      * @param string $act The action to perform (up or down).
      * @return void
      */
-    public function applyMigrations($act = 'up')
+    public function applyMigrations($act = 'up'): void
     {
         $this->createMigrationsTable();
+
         $appliedMigrations = $this->getAppliedMigrations();
-        $newMigrations = [];
-        $dir = Application::databasePath('migrations');
+
+        $dir = $this->dir();
         $files = Directory::files($dir);
-        $toApplyMigrations = array_diff($files, $appliedMigrations);
 
-        foreach ($toApplyMigrations as $migration) {
-            require_once $dir . Path::ds() . $migration;
+        if ($act == 'down') {
+            $appliedMigrationsAsDown = array_filter($appliedMigrations, fn ($m) =>  $m['type'] == 'down' && $m['migration']);
+            $migrationFilesDown = array_map(fn ($m) => $m['migration'], $appliedMigrationsAsDown);
 
-            $filename = basename($migration);
-            $className = '\App\Migrations\\' . pathinfo($filename, PATHINFO_FILENAME);
-
-            $instance = new $className();
-            if ($act === 'up') {
-                $instance->up();
-            } else if ($act === 'down') {
-                $instance->down();
+            foreach ($appliedMigrations as $appliedMigration) {
+                if ($appliedMigration['type'] === 'up' && !in_array($appliedMigration['migration'], $migrationFilesDown)) {
+                    $this->migrateWithLog($appliedMigration['migration'], $act);
+                }
             }
+        } elseif ($act == 'up') {
+            $migrationFiles = array_map(fn ($m) => $m['migration'], $appliedMigrations);
+            $toApplyMigrations = empty($migrationFiles) ? $files : array_diff($files, $migrationFiles);
 
-            $this->save($filename);
-            $this->record($filename);
+            foreach ($toApplyMigrations as $migration) {
+                $this->migrateWithLog($migration, $act);
+            }
         }
     }
+
+
 
     /**
      * Record the applied migration.
@@ -54,7 +73,7 @@ class Migration
      * @param string $migration The migration filename.
      * @return void
      */
-    public function record(string $migration)
+    private function record(string $migration): void
     {
         $this->appliedMigrations[] = $migration;
     }
@@ -64,7 +83,7 @@ class Migration
      *
      * @return array The applied migrations.
      */
-    public function appliedMigrations()
+    public function appliedMigrations(): array
     {
         return $this->appliedMigrations;
     }
@@ -73,11 +92,12 @@ class Migration
      * Save the migration to the migrations table.
      *
      * @param string $migration The migration filename.
+     * @param string $act The action to perform (up or down).
      * @return void
      */
-    public function save($migration)
+    private function save(string $migration, string $act): void
     {
-        MigrationModel::data(['migration' => $migration])->create();
+        MigrationModel::data(['migration' => $migration, 'type' => $act])->create();
     }
 
     /**
@@ -85,13 +105,15 @@ class Migration
      *
      * @return void
      */
-    public function createMigrationsTable()
+    private function createMigrationsTable(): void
     {
         $table = new Table('migrations');
         $table->autoIncrement();
         $table->string('migration');
+        $table->string('type')->default('up');
         $table->timestamps();
         $query = $table->buildQuery('create');
+
         DB::withQuery($query)->run();
     }
 
@@ -100,18 +122,21 @@ class Migration
      *
      * @return array The applied migrations.
      */
-    public function getAppliedMigrations()
+    private function getAppliedMigrations(): array
     {
-        $query = (string) Query::select('migrations')->selectColumns('migration');
+        $query = (string) Query::select('migrations')->selectColumns(['migration', 'type']);
 
         $migrations =  DB::withQuery($query)->get();
 
+
         $applied = [];
-        if ($migrations) {
+
+        if (!empty($migrations)) {
             foreach ($migrations as $m) {
-                $applied[] = $m['migration'];
+                $applied[] = $m;
             }
         }
+
         return $applied;
     }
 
@@ -120,7 +145,7 @@ class Migration
      *
      * @return bool True if the table was dropped successfully, false otherwise.
      */
-    public function dropMigration()
+    public function dropMigration(): bool
     {
         $query = (string) Query::drop('migrations')->dropTable();
         $result = DB::withQuery($query)->run();
@@ -133,11 +158,99 @@ class Migration
      *
      * @return bool True if the table was truncated successfully, false otherwise.
      */
-    public function emptyMigration()
+    public function emptyMigration(): bool
     {
         $query = (string) Query::delete('migrations')->truncate();
         $result = DB::withQuery($query)->run();
 
         return $result;
+    }
+
+
+    /**
+     * Apply the migration defined in the given migration file.
+     *
+     * @param string $migrationFile The migration filename.
+     * @param string $act The action to perform (up or down).
+     * @throws \Exception When migration class or methods are undefined, or an error occurs during migration.
+     * @return void
+     */
+    public function migrate(string $migrationFile, string $act): void
+    {
+        // Get the directory path for migrations
+        $dir = $this->dir();
+
+        // Load the migration file
+        require_once $dir . Path::ds() . $migrationFile;
+
+        // Extract the filename and class name from the migration file
+        $filename = basename($migrationFile);
+        $className = '\App\Migrations\\' . pathinfo($filename, PATHINFO_FILENAME);
+
+        // Check if the class exists and if the migration directory exists
+        if (!class_exists($className) || !File::exists($dir)) {
+            throw new \Exception("$className is undefined or the migration directory does not exist.");
+        }
+
+        // Load the migration class instance
+        $instance = DiClasses::load($className);
+
+        // Perform migration based on the action (up or down)
+        if ($act === 'up') {
+            if (!method_exists($instance, 'up')) {
+                throw new \Exception("Undefined method 'up' in $filename.");
+            }
+            $instance->up();
+            $this->migrated = true;
+        } elseif ($act === 'down') {
+            if (!method_exists($instance, 'down')) {
+                throw new \Exception("Undefined method 'down' in $filename.");
+            }
+            $instance->down();
+            $this->migrated = true;
+        }
+
+        // Save the migration and record if migration was successful
+        if ($this->migrated) {
+            $this->save($filename, $act);
+            $this->record($filename);
+        } else {
+            throw new \Exception("Error processing migration: $filename");
+        }
+    }
+
+
+    /**
+     * Check if a migration file has been migrated with the specified action.
+     *
+     * @param string $file The migration filename to check.
+     * @param string $act The action to check against (up or down).
+     * @return bool True if the migration has been migrated with the specified action, false otherwise.
+     */
+    public function isMigrated($file, $act): bool
+    {
+        foreach ($this->getAppliedMigrations() as $m) {
+            if ($m['type'] == $act && $file == $m['migration']) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+     /**
+     * Apply the migration defined in the given migration file with logging.
+     *
+     * @param string $migrationFile The migration filename.
+     * @param string $act The action to perform (up or down).
+     * @return void
+     */
+    public function migrateWithLog(string $migrationFile, string $act):void
+    {
+        try {
+            $this->migrate($migrationFile, $act);
+            Application::log()->info("Migration '{$migrationFile}' successfully $act.");
+        } catch (\Exception $e) {
+            Application::log()->error("Error during migration '{$migrationFile}': " . $e->getMessage());
+        }
     }
 }

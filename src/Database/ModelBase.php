@@ -146,7 +146,6 @@ trait ModelBase
     {
         $query = Query::insert(static::$table);
 
-
         $query->columns(static::columns());
         $query->values(static::values());
 
