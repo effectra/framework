@@ -49,6 +49,7 @@
         "effectra/http-middleware": "^1.0",
         "effectra/minifyer": "^1.0",
         "vlucas/valitron": "^1.4",
-        "effectra/cache": "^1.0"
+        "effectra/cache": "^1.0",
+        "league/climate": "^3.8"
     }
 }
