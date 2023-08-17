@@ -8,6 +8,7 @@ use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ControllerApiGenerator;
 use Effectra\Core\Generator\ControllerGenerator;
+use Effectra\Core\Router\RouterConfigurator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Symfony\Component\Console\Command\Command;
@@ -25,7 +26,8 @@ class GenerateController extends Command
             ->setDescription('Generate Controller class file')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Controller')
             ->addOption('crud', 'crud', InputOption::VALUE_NONE, 'generate controller with crud methods')
-            ->addOption('api', 'api', InputOption::VALUE_NONE, 'generate controller with api crud methods');
+            ->addOption('api', 'api', InputOption::VALUE_NONE, 'generate controller with api crud methods')
+            ->addOption('route', 'r', InputOption::VALUE_NONE, 'add route with this controller');
     }
 
 
@@ -57,10 +59,18 @@ class GenerateController extends Command
 
         $option = [];
 
+        $place = 'web';
+
         if ($input->getOption('api')) {
+            $place = 'api';
             $state = ControllerApiGenerator::make($className, $savePath, $option);
         } else {
             $state = ControllerGenerator::make($className, $savePath, $option);
+        }
+
+
+        if ($input->getOption('route')) {
+            RouterConfigurator::addRoute($className,$place);
         }
 
         if ($state) {
