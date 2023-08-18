@@ -11,6 +11,7 @@ use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Container\DiClasses;
 use Effectra\Core\Error\AppError;
 use Effectra\Core\Http\Cors;
+use Effectra\Core\Log\AppLogger;
 use Effectra\Core\Middlewares\AppMiddleware;
 use Effectra\Core\Router\AppRoute;
 use Effectra\Core\Server\DurationCalculator;
@@ -77,9 +78,12 @@ class Application
      */
     public function __construct(protected AppCore $appCore)
     {
+        //Calculate app running duration
         $this->duration = new DurationCalculator();
         $this->duration->start();
     }
+
+
 
     /**
      * Set the application path.
@@ -137,6 +141,10 @@ class Application
      */
     public static function log(): LoggerInterface
     {
+        //create log file
+        if (!AppLogger::exists()) {
+            AppLogger::create();
+        }
         return static::container()->get(Logger::class);
     }
 
@@ -249,10 +257,10 @@ class Application
     {
         $middlewares = $this->appCore->middlewares[$type] + AppMiddleware::get($type);
 
-        $middlewaresInstant=  array_map(function ($middleware) {
+        $middlewaresInstant =  array_map(function ($middleware) {
             return DiClasses::load($middleware);
         }, $middlewares);
-       
+
         return $middlewaresInstant;
     }
 
@@ -288,7 +296,7 @@ class Application
             $middlewares = $this->getMiddlewares();
         }
 
-       
+
         $response = new Response();
 
         $request = Request::convertRequest($request);
