@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\Console;
 
 use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Symfony\Component\Console\Command\Command;
@@ -15,6 +16,7 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class DeleteCommand extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -25,6 +27,7 @@ class DeleteCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
 
         $io = new ConsoleBlock($input, $output);
 

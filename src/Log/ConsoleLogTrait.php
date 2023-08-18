@@ -13,14 +13,11 @@ trait ConsoleLogTrait
     /**
      * Logs a message indicating that the class is running in console.
      *
-     * @param string $name The name of the method being called.
-     * @param array $arguments The arguments passed to the method.
      * @return void
      */
-    public function __call(string $name, array $arguments)
+    public function log(string $cmd,string $classFile)
     {
-        echo self::class . ' Class running in console';
-        Application::log()->info(self::class . ' Class running in console');
+        Application::log()->notice('running command ['.$cmd .'] from ' . $classFile);
     }
     
 }

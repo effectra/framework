@@ -53,6 +53,7 @@ class Serve extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->log($this->getName(),__FILE__);
         // Get the port number from the command line options
         $port = $input->getOption('port');
 

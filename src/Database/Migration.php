@@ -25,10 +25,16 @@ class Migration
      */
     protected bool $migrated = false;
 
-
+   /**
+    * @return string the migrations folder path
+    */
     public function dir(): string
     {
         return Application::databasePath('migrations');
+    }
+
+    public function __construct() {
+        $this->createMigrationsTable();
     }
 
     /**
@@ -39,7 +45,6 @@ class Migration
      */
     public function applyMigrations($act = 'up'): void
     {
-        $this->createMigrationsTable();
 
         $appliedMigrations = $this->getAppliedMigrations();
 
@@ -64,8 +69,6 @@ class Migration
             }
         }
     }
-
-
 
     /**
      * Record the applied migration.
@@ -177,6 +180,7 @@ class Migration
      */
     public function migrate(string $migrationFile, string $act): void
     {
+
         // Get the directory path for migrations
         $dir = $this->dir();
 
@@ -246,11 +250,12 @@ class Migration
      */
     public function migrateWithLog(string $migrationFile, string $act):void
     {
+        $filePath = $this->dir() . Path::ds() . $migrationFile;
         try {
             $this->migrate($migrationFile, $act);
-            Application::log()->info("Migration '{$migrationFile}' successfully $act.");
+            Application::log()->info("Migration '{$filePath}' successfully $act.");
         } catch (\Exception $e) {
-            Application::log()->error("Error during migration '{$migrationFile}': " . $e->getMessage());
+            Application::log()->error("Error during migration '{$filePath}': " . $e->getMessage());
         }
     }
 }

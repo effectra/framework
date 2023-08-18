@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Router;
 
 use Effectra\Core\Application;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,6 +14,7 @@ use Symfony\Component\Console\Helper\Table;
 
 class Routes extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -22,6 +24,8 @@ class Routes extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
+
         $table = new Table($output);
 
         $router = router();

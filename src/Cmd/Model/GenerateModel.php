@@ -9,6 +9,7 @@ use Effectra\Core\Application;
 use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ModelGenerator;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Symfony\Component\Console\Command\Command;
@@ -19,6 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class GenerateModel extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -31,6 +33,8 @@ class GenerateModel extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
+
         $plural = new PluralConverter();
 
         $io = new ConsoleBlock($input, $output);

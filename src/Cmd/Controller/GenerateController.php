@@ -8,6 +8,7 @@ use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ControllerApiGenerator;
 use Effectra\Core\Generator\ControllerGenerator;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Core\Router\RouterConfigurator;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
@@ -19,6 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class GenerateController extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -33,6 +35,7 @@ class GenerateController extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
 
         $io = new ConsoleBlock($input, $output);
 

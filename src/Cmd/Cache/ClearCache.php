@@ -6,12 +6,14 @@ namespace Effectra\Core\Cmd\Cache;
 
 use Effectra\Core\Cache\AppCache;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ClearCache extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -21,6 +23,8 @@ class ClearCache extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
+
         $io = new ConsoleBlock($input, $output);
 
         $action = AppCache::clear();

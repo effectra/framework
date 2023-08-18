@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Cmd\Router;
 
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Core\Router\RouterConfigurator;
 use League\CLImate\CLImate;
 use Symfony\Component\Console\Command\Command;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddRouter extends Command
 {
+  use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -28,6 +30,7 @@ class AddRouter extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+      $this->log($this->getName(),__FILE__);
 
         $climate = new CLImate();
 

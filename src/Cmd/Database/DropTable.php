@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\Database;
 
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Facades\DB;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\SqlQuery\Query;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class DropTable extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -24,6 +26,7 @@ class DropTable extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
 
         $io = new ConsoleBlock($input, $output);
 

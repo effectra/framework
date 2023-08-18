@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\View;
 
 use Effectra\Core\Application;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\Directory;
 use Effectra\Fs\Path;
 use Symfony\Component\Console\Command\Command;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Helper\Table;
 
 class Views extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -23,7 +25,7 @@ class Views extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
+        $this->log($this->getName(),__FILE__);
 
         $table = new Table($output);
 

@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\View;
 
 use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class GenerateView extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -26,6 +28,8 @@ class GenerateView extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
+
         function addDotsEverySecond($string)
         {
             $output = '';
@@ -56,7 +60,7 @@ class GenerateView extends Command
             $io->warning('File exists !');
             return 0;
         }
-
+        addDotsEverySecond("");
         $content = sprintf('<h1>%s</h1>',$name) ;
 
         $state = File::put($file, $content);

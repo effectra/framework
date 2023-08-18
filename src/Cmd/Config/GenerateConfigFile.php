@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\Config;
 
 use Effectra\Core\Application;
 use Effectra\Core\Console\ConsoleBlock;
+use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\Generator\GeneratorConfigFile;
@@ -16,6 +17,7 @@ use Symfony\Component\Console\Input\InputArgument;
 
 class GenerateConfigFile extends Command
 {
+    use ConsoleLogTrait;
 
     protected function configure()
     {
@@ -26,6 +28,7 @@ class GenerateConfigFile extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log($this->getName(),__FILE__);
 
         $io = new ConsoleBlock($input, $output);
 
