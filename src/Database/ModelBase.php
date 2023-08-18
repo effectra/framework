@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * The ModelBase trait provides common database operations for models.
  */
-trait ModelBase 
+trait ModelBase
 {
     /**
      * Get the database instance.
@@ -258,5 +258,19 @@ trait ModelBase
         $result = static::db()->withQuery($query)->run();
 
         return $result;
+    }
+
+    /**
+     * limit rows of table records.
+     * @param int $from
+     * @param null|int $to
+     * @return array|null The retrieved records, or null if no records found.
+     */
+    public function limit(int $from, ?int $to = null): ?array
+    {
+        $query = Query::select(static::$table)->limit($from, $to);
+        $data = static::db()->withQuery($query)->get();
+
+        return static::pretty($data);
     }
 }
