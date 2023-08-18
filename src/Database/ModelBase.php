@@ -266,7 +266,7 @@ trait ModelBase
      * @param null|int $to
      * @return array|null The retrieved records, or null if no records found.
      */
-    public function limit(int $from, ?int $to = null): ?array
+    public static function limit(int $from, ?int $to = null): ?array
     {
         $query = Query::select(static::$table)->limit($from, $to);
         $data = static::db()->withQuery($query)->get();
