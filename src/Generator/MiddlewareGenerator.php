@@ -13,12 +13,13 @@ class MiddlewareGenerator implements GeneratorInterface
 
     public static function make(string $className, string $savePath, array $option = []): int|false
     {
+        $namespace = $option['namespace'] ? 'App\Middlewares' . $option['namespace'] : 'App\Middlewares';
         $class = new GeneratorClass(new Creator(), $className);
         $content = 'return $handler->handle($request);';
 
         return $class
             ->withExtends('Middleware')
-            ->withNameSpace('App\Middlewares')
+            ->withNameSpace($namespace)
             ->withPackages([
                 'Effectra\Http\Server\Middleware',
                 'Psr\Http\Message\ResponseInterface',

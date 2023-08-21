@@ -11,10 +11,11 @@ class CommandGenerator implements GeneratorInterface
 
     public static function make(string $className,string $savePath,array $option = []):int|false
     {
+        $namespace = $option['namespace'] ? 'App\Commands' . $option['namespace'] : 'App\Commands';
         $class = new GeneratorClass(new Creator(), $className);
         return $class
             ->setName($className)
-            ->withNameSpace('App\Commands')
+            ->withNameSpace($namespace)
             ->withPackages([
                 'Effectra\Core\Command'
             ])

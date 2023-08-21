@@ -13,13 +13,13 @@ class ControllerGenerator implements GeneratorInterface
 
     public static function make(string $className, string $savePath, array $option = []): int|false
     {
+        $namespace = $option['namespace'] ? 'App\Controllers' . $option['namespace'] : 'App\Controllers';
         $class = new GeneratorClass(new Creator(), $className);
-
         $content = '
         return $response;
         ';
         return $class
-            ->withNameSpace('App\Controllers')
+            ->withNameSpace($namespace)
             ->withPackages([
                 'Effectra\Core\Request',
                 'Effectra\Core\Response'

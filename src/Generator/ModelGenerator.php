@@ -11,10 +11,11 @@ class ModelGenerator implements GeneratorInterface
 
     public static function make(string $className,string $savePath,array $option = []):int|false
     {
+        $namespace = $option['namespace'] ? 'App\Models' . $option['namespace'] : 'App\Models';
         $class = new GeneratorClass(new Creator(), $className);
 
         return $class
-            ->withNameSpace('App\Models')
+            ->withNameSpace($namespace)
             ->withPackages([
                 'Effectra\Core\Database\ModelBase',
             ])
