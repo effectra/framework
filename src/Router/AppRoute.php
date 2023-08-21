@@ -123,7 +123,7 @@ class AppRoute
             $this->router->setNotFound(function () {
                 return response()->json([
                     'message' => 'The requested resource was not found on this server.'
-                ]);
+                ],404);
             });
         }
 
