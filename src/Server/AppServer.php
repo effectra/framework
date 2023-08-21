@@ -16,16 +16,16 @@ class AppServer
     /**
      * Run the PHP development server on the specified port.
      *
-     * @param int $port The port number to run the server on.
+     * @param int|string $port The port number to run the server on.
      * @return void
      */
-    public static function run(int $port): void
+    public static function run(int|string $port): void
     {
-        if(!static::isAvailablePort($port)){
-            echo "\033[0;31m This port '$port' it's not available now \033[0m";
-            die;
-        }
-        
+        // if (!static::isAvailablePort($port)) {
+        //     echo "\033[0;31m This port '$port' it's not available now \033[0m";
+        //     die;
+        // }
+
         $command = sprintf("php -S %s:%s -t public/", static::$HOST_NAME, $port);
         AppConsole::print($command);
     }
@@ -38,14 +38,23 @@ class AppServer
      */
     public static function isAvailablePort(int $port): bool
     {
-        $socket = @stream_socket_server("tcp://" . static::$HOST_NAME . ":$port", $errno, $errstr);
-
-        if ($socket === false) {
+        $socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    
+        if (!$socket) {
+            // Failed to create socket, port is likely not available
             return false;
         }
-
-        fclose($socket);
-
-        return true;
+        
+        // Set socket options to allow reusing the port
+        @socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);
+        
+        // Try binding the socket to the given port
+        $result = @socket_bind($socket, '0.0.0.0', $port);
+        
+        // Clean up the socket
+        @socket_close($socket);
+        
+        // If binding was successful, the port is available
+        return $result;
     }
 }

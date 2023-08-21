@@ -7,6 +7,7 @@ namespace Effectra\Core\Cmd;
 use Effectra\Core\Application;
 use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Core\Server\AppServer;
+use Effectra\Core\Utils\EnvManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -65,12 +66,15 @@ class Serve extends Command
             $output->writeln('<fg=red>ERROR:</> Public directory not found.');
             return Command::FAILURE;
         }
-
+        $file = Application::appPath('.env');
+        $env = new EnvManager($file);
+        $env->set('APP_URL',"http://localhost:" . $port);
+        $env->save();
         // Start the development server
-        $output->writeln("<fg=green>Server started:</> <fg=yellow>http://localhost:{$port}</>");
-        $output->writeln("<fg=green>Document root:</> <fg=yellow>{$publicDir}</>");
-        
-        return AppServer::run($port);
+        $output->writeln("<fg=green>Server started:</> <fg=yellow>http://localhost:{$port} </>");
+        $output->writeln("<fg=green>Document root:</> <fg=yellow>{$publicDir} </>");
+
+        AppServer::run($port);
 
         return Command::SUCCESS;
     }
