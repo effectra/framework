@@ -54,6 +54,7 @@ class Migrate extends Command
                 echo "  This migration has been migrated\n";
             }else{
                 $m->migrateWithLog($name,$act);
+                echo $io->addDots($name, "DONE\n");
             }
             return 0;
         }else{

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Controller;
 
 use Effectra\Core\Application;
+use Effectra\Core\ConfigureFile;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ControllerApiGenerator;
 use Effectra\Core\Generator\ControllerGenerator;
 use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Core\Router\RouterConfigurator;
+use Effectra\Fs\Directory;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Symfony\Component\Console\Command\Command;
@@ -35,7 +37,7 @@ class GenerateController extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
+        $this->log($this->getName(), __FILE__);
 
         $io = new ConsoleBlock($input, $output);
 
@@ -45,13 +47,11 @@ class GenerateController extends Command
 
         $path = Application::appPath('app' . Path::ds() . 'Controllers');
 
-        if (!str_contains('Controller', $name)) {
-            $name = trim($name) . 'Controller';
-        }
+        $config = new ConfigureFile('Controller', $name, $path);
 
-        $className = ucfirst($name);
+        $className =  $config->toClassName($name);
 
-        $savePath = $path . Path::ds() . $name  . '.php';
+        $savePath = $config->toFilePath(ConfigureFile::CREATE_FOLDER_IF_NOT_EXCITE);
 
         $io->text('Generate: ' . $savePath);
 
@@ -60,7 +60,9 @@ class GenerateController extends Command
             return 0;
         }
 
-        $option = [];
+        $option = [
+            'namespace' => $config->getNameSpace()
+        ];
 
         $place = 'web';
 
@@ -73,7 +75,7 @@ class GenerateController extends Command
 
 
         if ($input->getOption('route')) {
-            RouterConfigurator::addRoute($className,$place);
+            RouterConfigurator::addRoute($className, $place);
         }
 
         if ($state) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Console;
 
 use Effectra\Core\Application;
+use Effectra\Core\ConfigureFile;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\CommandGenerator;
 use Effectra\Core\Log\ConsoleLogTrait;
@@ -29,7 +30,7 @@ class GenerateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
+        $this->log($this->getName(), __FILE__);
 
         $io = new ConsoleBlock($input, $output);
 
@@ -37,7 +38,13 @@ class GenerateCommand extends Command
 
         $name = $input->getArgument('name');
 
-        $savePath = Application::appPath('app' . Path::ds() . 'Commands' . Path::ds() . $name . '.php');
+        $path = Application::appPath('app' . Path::ds() . 'Commands');
+
+        $config = new ConfigureFile('Commands', $name, $path);
+
+        $className =  $config->toClassName($name);
+
+        $savePath = $config->toFilePath(ConfigureFile::CREATE_FOLDER_IF_NOT_EXCITE);
 
         $io->text('Generate: ' . $savePath);
 
@@ -46,9 +53,11 @@ class GenerateCommand extends Command
             return 0;
         }
 
-        $className = ucfirst($name) ;
+        $option = [
+            'namespace' => $config->getNameSpace()
+        ];
 
-        $state = CommandGenerator::make($className,$savePath);
+        $state = CommandGenerator::make($className, $savePath, $option);
 
         if ($state) {
             $io->success('File created successfully!');

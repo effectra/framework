@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Middleware;
 
 use Effectra\Core\Application;
+use Effectra\Core\ConfigureFile;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\MiddlewareGenerator;
 use Effectra\Core\Log\ConsoleLogTrait;
@@ -38,13 +39,11 @@ class GenerateMiddleware extends Command
 
         $path = Application::appPath('app' . Path::ds() . 'Middlewares');
 
-        if (!str_contains('Middleware', $name)) {
-            $name = trim($name) . 'Middleware';
-        }
+        $config = new ConfigureFile('Middleware', $name, $path);
 
-        $className = ucfirst($name);
+        $className =  $config->toClassName($name);
 
-        $savePath = $path . Path::ds() . $name  . '.php';
+        $savePath = $config->toFilePath(ConfigureFile::CREATE_FOLDER_IF_NOT_EXCITE);
 
         $io->text('Generate: ' . $savePath);
 
@@ -53,7 +52,11 @@ class GenerateMiddleware extends Command
             return 0;
         }
 
-        $state = MiddlewareGenerator::make($className,$savePath);
+        $option = [
+            'namespace' => $config->getNameSpace()
+        ];
+
+        $state = MiddlewareGenerator::make($className,$savePath,$option);
 
         if ($state) {
             $io->success('File created successfully!');

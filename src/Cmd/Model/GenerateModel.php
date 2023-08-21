@@ -28,12 +28,14 @@ class GenerateModel extends Command
             ->setDescription('Generate model class file')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the model')
             ->addOption('migration', 'm', InputOption::VALUE_NONE, 'Generate migration for this model')
-            ->addOption('controller', 'c', InputOption::VALUE_NONE, 'Generate controller for this model');
+            ->addOption('controller', 'c', InputOption::VALUE_NONE, 'Generate controller for this model')
+            ->addOption('api', 'api', InputOption::VALUE_NONE, 'generate controller with api crud methods')
+            ->addOption('route', 'r', InputOption::VALUE_NONE, 'add route with this controller');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
+        $this->log($this->getName(), __FILE__);
 
         $plural = new PluralConverter();
 
@@ -73,7 +75,15 @@ class GenerateModel extends Command
             AppConsole::print('php aval migration:make create_table_' . $tableName . ' --table=' . $tableName);
         }
         if ($input->getOption('controller')) {
-            AppConsole::print('php aval controller:make ' . $className);
+            $controller = ucfirst($name);
+            $option_controller = "";
+            if ($input->getOption('api')) {
+                $option_controller .= " --api ";
+            }
+            if ($input->getOption('r')) {
+                $option_controller .= " --route ";
+            }
+            AppConsole::print("php aval controller:make $controller $option_controller");
         }
 
         return 0;

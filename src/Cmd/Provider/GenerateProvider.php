@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Provider;
 
 use Effectra\Core\Application;
+use Effectra\Core\ConfigureFile;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Generator\ProviderGenerator;
 use Effectra\Core\Log\ConsoleLogTrait;
@@ -28,7 +29,7 @@ class GenerateProvider extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
+        $this->log($this->getName(), __FILE__);
 
         $io = new ConsoleBlock($input, $output);
 
@@ -36,14 +37,13 @@ class GenerateProvider extends Command
 
         $name = $input->getArgument('name');
 
+        $path = Application::appPath('app' . Path::ds() . 'Providers');
 
-        if (!str_contains('Provider', $name)) {
-            $name = trim($name) . 'Provider';
-        }
+        $config = new ConfigureFile('Controller', $name, $path);
 
-        $className = ucfirst($name);
+        $className =  $config->toClassName($name);
 
-        $savePath = Application::appPath('app' . Path::ds() . 'Providers' . Path::ds() . $className . '.php');
+        $savePath = $config->toFilePath(ConfigureFile::CREATE_FOLDER_IF_NOT_EXCITE);
 
         $io->text('Generate: ' . $savePath);
 
@@ -52,8 +52,11 @@ class GenerateProvider extends Command
             return 0;
         }
 
+        $option = [
+            'namespace' => $config->getNameSpace()
+        ];
 
-        $state = ProviderGenerator::make($className, $savePath);
+        $state = ProviderGenerator::make($className, $savePath, $option);
 
         if ($state) {
             $io->success('File created successfully!');
