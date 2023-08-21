@@ -50,6 +50,9 @@ class Migrate extends Command
         $name = $input->getArgument('file');
 
         if($name){
+            if(!strpos('.php',$name)){
+                $name .= '.php';
+            }
             if($m->isMigrated($name,$act)){
                 echo "  This migration has been migrated\n";
             }else{
