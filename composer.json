@@ -27,7 +27,6 @@
         "psr/http-message": "^2.0",
         "effectra/config": "^1.0",
         "effectra/contracts": "^1.0",
-        "effectra/sql-query": "^1.0",
         "effectra/db": "^2.0",
         "effectra/clock": "^1.0",
         "effectra/fs": "2.0",
