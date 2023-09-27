@@ -27,7 +27,7 @@
         "psr/http-message": "^2.0",
         "effectra/config": "^1.0",
         "effectra/contracts": "^1.0",
-        "effectra/db": "^2.0",
+        "effectra/db": "^2.1",
         "effectra/clock": "^1.0",
         "effectra/fs": "2.0",
         "effectra/http-message": "^1.0",
@@ -49,6 +49,7 @@
         "effectra/minifyer": "^1.0",
         "vlucas/valitron": "^1.4",
         "effectra/cache": "^1.0",
-        "league/climate": "^3.8"
+        "league/climate": "^3.8",
+        "effectra/sql-query": "^2.0"
     }
 }
