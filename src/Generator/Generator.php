@@ -10,5 +10,6 @@ class Generator implements GeneratorInterface
     public static function make(string $className,string $savePath,array $option = []):int|false
     {
         
+        return false;
     }
 }
