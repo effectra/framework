@@ -59,7 +59,7 @@ class AppDatabase
         $driver = static::getDriver('mysql');
         if ($driver) {
             $name = $driver['database'];
-            $query = Query::createDatabase($name);
+            $query = Query::database($name)->create();
             try {
                 return DB::withQuery($query)->run();
             } catch (PDOException $e) {
@@ -115,7 +115,7 @@ class AppDatabase
         $config = static::getDriver($driver);
 
         try {
-            return (bool) DB::withQuery(Query::describe($config['database']))->run();
+            return (bool) DB::query(Query::info()->listTables($config['database']))->run();
         } catch (PDOException $e) {
             return false;
         }

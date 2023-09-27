@@ -5,15 +5,18 @@ declare(strict_types=1);
 namespace Effectra\Core\Database;
 
 use Effectra\Core\Application;
+use Effectra\Database\Data\DataRules;
 use Effectra\Database\DB;
+use Effectra\SqlQuery\Condition;
 use Effectra\SqlQuery\Query;
-use InvalidArgumentException;
 
 /**
  * The ModelBase trait provides common database operations for models.
  */
 trait ModelBase
 {
+    protected static array $data = [];
+
     /**
      * Get the database instance.
      *
@@ -25,64 +28,54 @@ trait ModelBase
     }
 
     /**
-     * Format the data in a pretty format.
+     * Display data fetched from the database based on the model's data rules.
      *
-     * @param array $data The data to format.
-     * @return array The formatted data.
+     * @param \PDOStatement $stmt The PDO statement containing the fetched data.
+     *
+     * @return array|null An array of fetched data or null if no data rules are defined.
      */
-    public static function pretty($data)
+    public static function displayData($stmt): array
     {
-        $callback = function ($item) {
-            if (isset(static::$display)) {
-                foreach (static::$display['json'] as $key) {
-                    $item[$key] = json_decode($item[$key], true);
-                }
-            }
+        // Check if the method getDataRules() exists in the current class.
+        if (!method_exists(static::class, 'getDataRules')) {
+            return null;
+        }
 
-            return $item;
-        };
+        // Get the data rules for the model.
+        $dataRules = static::getDataRules();
 
-        return array_map($callback, $data);
+        if ($dataRules) {
+            // Fetch data using the DataRules attributes and rules.
+            return $stmt->fetchPretty(function (DataRules $r) use ($dataRules) {
+                $r->setAttributes($dataRules->getAttributes());
+                $r->setRules($dataRules->getRules());
+            });
+        }
+
+        // If no data rules are defined, fetch data without formatting.
+        return $stmt->fetch();
     }
 
     /**
-     * The data to be used for the model.
+     * Format the data in a pretty format.
+     * @param mixed $data The data to be inserted.
      *
-     * @var array
+     * @throws DataValidatorException If the data is not valid.
      */
-    protected static $data = [];
+    public static function optimizeData($data, callable $rules)
+    {
+        static::db()->prettyData($data, $rules);
+    }
 
     /**
      * Set the data for the model.
      *
      * @param array $data The data to set.
-     * @return self The model instance.
      */
-    public static function data($data): self
+    public static function data($data)
     {
         static::$data = $data;
-
         return new static;
-    }
-
-    /**
-     * Get the values from the data.
-     *
-     * @return array The values.
-     */
-    private static function values()
-    {
-        return array_values(static::$data);
-    }
-
-    /**
-     * Get the columns from the data.
-     *
-     * @return array The columns.
-     */
-    private static function columns()
-    {
-        return array_keys(static::$data);
     }
 
     /**
@@ -92,10 +85,10 @@ trait ModelBase
      */
     public static function all()
     {
-        $query = (string) Query::select(static::$table);
-        $data = static::db()->withQuery($query)->get();
+        $query = (string) Query::select(static::$table)->all();
+        $stmt = static::db()->query($query);
 
-        return static::pretty($data);
+        return static::displayData($stmt);
     }
 
     /**
@@ -108,11 +101,9 @@ trait ModelBase
     public static function find($id, ?bool $associative = null)
     {
         $query = (string) Query::select(static::$table)->whereId($id)->limit(1);
-        $result = static::db()->withQuery($query)->get();
-        if ($result) {
-            $data = static::pretty($result)[0];
-
-            return $associative ? $data : (object) $data;
+        $data = static::db()->query($query);
+        if ($data) {
+            return $associative ? static::displayData($data) : (object) static::displayData($data);
         }
         return null;
     }
@@ -120,43 +111,38 @@ trait ModelBase
     /**
      * Find records based on conditions.
      *
-     * @param array $conditions The conditions to match.
+     * @param Condition $conditions The conditions to match.
      * @param bool|null $associative Whether to return an associative array or object.
      * @return object|null|array The retrieved record, or null if no record found.
      */
-    public static function where($conditions, ?bool $associative = null)
+    public static function where(Condition $conditions, ?bool $associative = null)
     {
-        $query = (string) Query::select(static::$table)->where($conditions);
-        $result = static::db()->withQuery($query)->get();
-        if ($result) {
-            $data = static::pretty($result);
-
-            return $associative ? $data : (object) $data;
+        $query = (string) Query::select(static::$table)->whereConditions($conditions);
+        $data = static::db()->query($query)->fetch();
+        if ($data) {
+            return $associative ? static::displayData($data) : (object) static::displayData($data);
         }
         return null;
     }
 
     /**
-     * Create a new record.
+     * Create a new record. 
      *
-     * @return object|false The created record, or false if creation failed.
-     * @throws \Exception If no values specified for insertion.
+     * @return bool — True if the data was successfully inserted, false otherwise.
      */
     public static function create()
     {
-        $query = Query::insert(static::$table);
+        return static::db()->table(static::$table)->insert(static::$data);
+    }
 
-        $query->columns(static::columns());
-        $query->values(static::values());
-
-        if (empty($query->getValues())) {
-            throw new \Exception("No values specified for insertion.");
-        }
-        $success = static::db()->withQuery((string) $query)->run();
-        if ($success) {
-            return (object) ['id' => static::db()->getConn()->lastInsertId()];
-        }
-        return false;
+    /**
+     * Get the ID of the last inserted row.
+     * 
+     * @return string|false — Returns the last inserted ID or false on failure.
+     */
+    public static function getId(): string|false
+    {
+        return static::db()->lastInsertId();
     }
 
     /**
@@ -164,44 +150,22 @@ trait ModelBase
      *
      * @param mixed $id The ID of the record to update.
      * @return bool Whether the update operation was successful.
-     * @throws \Exception If no values specified for update.
      */
     public static function update($id)
     {
-        $query = Query::Update(static::$table)->where(['id' => $id]);
-
-        $query->values(static::values());
-        $query->columns(static::columns());
-
-        if (empty($query->getValues())) {
-            throw new \Exception("No values specified for insertion.");
-        }
-
-        $result = static::db()->withQuery($query)->run($query->combineColumnsValues());
-        return $result;
+        return static::db()->table(static::$table)->update(static::$data, (new Condition())->where(['id' => $id]));
     }
 
     /**
      * Update a record.
      *
-     * @param mixed $conditions The conditions of the record to update.
+     * @param Condition $conditions The conditions of the record to update.
      * @return bool Whether the update operation was successful.
-     * @throws \Exception If no values specified for update.
      */
-    public static function updateWhere($conditions)
+    public static function updateWhere(Condition $conditions)
     {
-        $query = Query::Update(static::$table)->where($conditions);
-
-        $query->values(static::values());
-        $query->columns(static::columns());
-
-        if (empty($query->getValues())) {
-            throw new \Exception("No values specified for insertion.");
-        }
-        $result = static::db()->withQuery($query)->run($query->combineColumnsValues());
-        return $result;
+        return static::db()->table(static::$table)->update(static::$data, $conditions);
     }
-
 
     /**
      * Search for records based on conditions.
@@ -212,15 +176,13 @@ trait ModelBase
      */
     public static function search($conditions)
     {
-        if (!$conditions || empty($conditions)) {
-            throw new InvalidArgumentException('Invalid conditions.');
+        if (empty($conditions)) {
+            throw new \InvalidArgumentException('Invalid conditions.');
         }
-        $query = (string) Query::select(static::$table)->where($conditions, 'LIKE');
-        $result = static::db()->withQuery($query)->get();
-        if ($result) {
-            return $result;
-        }
-        return null;
+        $query = (string) Query::select(static::$table)->whereLike($conditions);
+        $data = static::db()->query($query);
+
+        return static::displayData($data);
     }
 
     /**
@@ -231,10 +193,7 @@ trait ModelBase
      */
     public static function delete($id)
     {
-        $query = Query::delete(static::$table)->deleteById($id);
-        $result = static::db()->withQuery($query)->run();
-
-        return $result;
+        return static::db()->table(static::$table)->delete((new Condition())->where(['id' => ':id']), ['id' => $id]);
     }
 
     /**
@@ -254,10 +213,8 @@ trait ModelBase
      */
     public static function truncate()
     {
-        $query = Query::delete(static::$table)->truncate();
-        $result = static::db()->withQuery($query)->run();
-
-        return $result;
+        $query = Query::truncate(static::$table);
+        return static::db()->query($query)->run();
     }
 
     /**
@@ -269,8 +226,8 @@ trait ModelBase
     public static function limit(int $from, ?int $to = null): ?array
     {
         $query = Query::select(static::$table)->limit($from, $to);
-        $data = static::db()->withQuery($query)->get();
+        $data = static::db()->query($query);
 
-        return static::pretty($data);
+        return static::displayData($data);
     }
 }

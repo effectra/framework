@@ -36,9 +36,9 @@ class DropTable extends Command
 
         $io->text('Drop table ' . $name);
 
-        $query = Query::drop($name)->dropTable();
+        $query = Query::drop()->table($name)->dropTable();
 
-        $state = DB::withQuery($query)->run();
+        $state = DB::query((string) $query)->run();
 
         if ($state) {
             $io->success('Table dropped successfully!');

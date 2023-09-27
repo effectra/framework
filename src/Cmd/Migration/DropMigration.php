@@ -36,7 +36,7 @@ class DropMigration extends Command
         if (!$result) {
             $io->errorMsg('failed drops table migrations');
         }
-        $io->success('table droped successfully!');
+        $io->success('table dropped successfully!');
 
         return 0;
     }

@@ -18,7 +18,9 @@ class DatabaseProvider  extends ServiceProvider implements ServiceInterface
 
             $conn = AppDatabase::connect();
 
-            $db = new DB($conn->connect());
+            $driver = AppDatabase::getDriverDefault();
+
+            $db = new DB($driver, $conn->connect());
 
             return $db;
         });

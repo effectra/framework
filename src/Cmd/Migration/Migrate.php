@@ -23,55 +23,55 @@ class Migrate extends Command
             ->setDescription('Run migrations')
             ->addArgument('file', InputArgument::OPTIONAL, 'The name of the migration file')
             ->addOption('down', 'd', InputOption::VALUE_NONE, 'migrate down');
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
 
-        $io = new ConsoleBlock($input, $output);
+            $this->log($this->getName(), __FILE__);
 
-        $io->info('Run Migrations');
+            $io = new ConsoleBlock($input, $output);
 
-        $m = new Migration();
+            $io->info('Run Migrations');
 
-        $event = function ($fileName, $io) {
-            $io->addDots($fileName, 50, "DONE\n");
-        };
+            $m = new Migration();
 
-        $act = 'up';
+            $event = function ($fileName, $io) {
+                $io->addDots($fileName, 50, "DONE\n");
+            };
 
-        if ($input->getOption('down')) {
-            $act = 'down';
-        }
+            $act = 'up';
 
-
-        $name = $input->getArgument('file');
-
-        if($name){
-            if(!strpos('.php',$name)){
-                $name .= '.php';
+            if ($input->getOption('down')) {
+                $act = 'down';
             }
-            if($m->isMigrated($name,$act)){
-                echo "  This migration has been migrated\n";
-            }else{
-                $m->migrateWithLog($name,$act);
-                echo $io->addDots($name, "DONE\n");
+
+
+            $name = $input->getArgument('file');
+
+            if ($name) {
+                if (!strpos('.php', $name)) {
+                    $name .= '.php';
+                }
+                if ($m->isMigrated($name, $act)) {
+                    echo "  This migration has been migrated\n";
+                } else {
+                    $m->migrateWithLog($name, $act);
+                    echo $io->addDots($name, "DONE\n");
+                }
+                return 0;
+            } else {
+                $m->applyMigrations($act, $event);
             }
-            return 0;
-        }else{
-            $m->applyMigrations($act, $event);
-        }
 
+            if (empty($m->appliedMigrations())) {
+                echo "  No migrations applied\n";
+            }
 
-        if (empty($m->appliedMigrations())) {
-            echo "  No migrations applied\n";
-        }
-
-        foreach ($m->appliedMigrations() as $migration) {
-            echo $io->addDots($migration, "DONE\n");
-        }
+            foreach ($m->appliedMigrations() as $migration) {
+                echo $io->addDots($migration, "DONE\n");
+            }
+        
 
         return 0;
     }

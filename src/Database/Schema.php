@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Database;
 
 use Effectra\Core\Facades\DB;
+use Effectra\SqlQuery\Query;
 use Effectra\SqlQuery\Table;
 
 /**
@@ -17,14 +18,19 @@ class Schema
      *
      * @param string $tableName The name of the table to create.
      * @param callable $callback The callback function to define the table structure.
-     * @return void
+     * @param bool $exists Specify whether the table should only be created if exist or not.
+     * @return static
      */
-    public static function create(string $tableName, callable $callback)
+    public static function create(string $tableName, callable $callback, bool $exists = false)
     {
-        $table = new Table($tableName);
-        call_user_func($callback, $table);
-        $query = $table->buildQuery('create');
-        DB::withQuery($query)->run();
+        $query = Query::createTable($tableName, $callback);
+        if ($exists === true) {
+            $query->ifExists();
+        }
+        if ($exists === false) {
+            $query->ifNotExists();
+        }
+        DB::query((string) $query)->run();
     }
 
     /**
@@ -36,13 +42,7 @@ class Schema
      */
     public static function table(string $tableName, callable $callback)
     {
-        $table = new Table($tableName);
-        $cols = DB::table($tableName)->getColumnsField();
-        $table->setColumns($cols);
-        call_user_func($callback, $table);
-        $query = $table->buildQuery('modify');
-        if (!empty($query)) {
-            DB::withQuery($query)->run();
-        }
+        $query = Query::updateTable($tableName, $callback);
+        DB::query($query)->run();
     }
 }

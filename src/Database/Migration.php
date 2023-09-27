@@ -12,6 +12,7 @@ use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\SqlQuery\Query;
 use Effectra\SqlQuery\Table;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Migration
 {
@@ -25,15 +26,16 @@ class Migration
      */
     protected bool $migrated = false;
 
-   /**
-    * @return string the migrations folder path
-    */
+    /**
+     * @return string the migrations folder path
+     */
     public function dir(): string
     {
         return Application::databasePath('migrations');
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->createMigrationsTable();
     }
 
@@ -110,14 +112,14 @@ class Migration
      */
     private function createMigrationsTable(): void
     {
-        $table = new Table('migrations');
-        $table->autoIncrement();
-        $table->string('migration');
-        $table->string('type')->default('up');
-        $table->timestamps();
-        $query = $table->buildQuery('create');
 
-        DB::withQuery($query)->run();
+        $query = Query::createTable('migrations', function (Table $table) {
+            $table->autoIncrement();
+            $table->string('migration');
+            $table->string('type')->default('up');
+            $table->timestamps();
+        })->ifNotExists();
+        DB::query((string) $query)->run();
     }
 
     /**
@@ -127,10 +129,9 @@ class Migration
      */
     private function getAppliedMigrations(): array
     {
-        $query = (string) Query::select('migrations')->selectColumns(['migration', 'type']);
+        $query = (string) Query::select('migrations')->columns(['migration', 'type']);
 
-        $migrations =  DB::withQuery($query)->get();
-
+        $migrations =  DB::query((string) $query)->fetch();
 
         $applied = [];
 
@@ -150,8 +151,8 @@ class Migration
      */
     public function dropMigration(): bool
     {
-        $query = (string) Query::drop('migrations')->dropTable();
-        $result = DB::withQuery($query)->run();
+        $query = Query::drop()->table('migrations')->dropTable();
+        $result = DB::query((string) $query)->run();
 
         return $result;
     }
@@ -163,8 +164,8 @@ class Migration
      */
     public function emptyMigration(): bool
     {
-        $query = (string) Query::delete('migrations')->truncate();
-        $result = DB::withQuery($query)->run();
+        $query =  Query::truncate('migrations');
+        $result = DB::query((string) $query)->run();
 
         return $result;
     }
@@ -213,7 +214,6 @@ class Migration
             $instance->down();
             $this->migrated = true;
         }
-
         // Save the migration and record if migration was successful
         if ($this->migrated) {
             $this->save($filename, $act);
@@ -241,21 +241,22 @@ class Migration
         return false;
     }
 
-     /**
+    /**
      * Apply the migration defined in the given migration file with logging.
      *
      * @param string $migrationFile The migration filename.
      * @param string $act The action to perform (up or down).
      * @return void
      */
-    public function migrateWithLog(string $migrationFile, string $act):void
+    public function migrateWithLog(string $migrationFile, string $act): void
     {
         $filePath = $this->dir() . Path::ds() . $migrationFile;
         try {
             $this->migrate($migrationFile, $act);
             Application::log()->info("Migration '{$filePath}' successfully $act.");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Application::log()->error("Error during migration '{$filePath}': " . $e->getMessage());
+            VarDumper::dump($e);
         }
     }
 }
