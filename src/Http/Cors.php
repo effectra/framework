@@ -43,9 +43,15 @@ class Cors
         // Get headers from request
         $headers = $request->getHeaderLine('Access-Control-Request-Headers');
 
+        $allow_origin = $cors['allow-origin'];
+
+        if (is_string($allow_origin)) {
+            $allow_origin = [$allow_origin];
+        }
+
         // Set headers for response
         $response = $response->withHeader('Access-Control-Max-Age', (string) $cors['max-age']);
-        $response = $response->withHeader('Access-Control-Allow-Origin', $cors['allow-origin']);
+        $response = $response->withHeader('Access-Control-Allow-Origin', join(',', $allow_origin));
         $response = $response->withHeader('Access-Control-Allow-Credentials', $cors['allow-credentials'] ? 'true' : 'false');
         $response = $response->withHeader('Access-Control-Allow-Headers', $headers);
         $response = $response->withHeader('Access-Control-Allow-Methods', join(',', $cors['methods']));
