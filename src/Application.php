@@ -34,7 +34,7 @@ class Application
     /**
      * The version of the application.
      */
-    const VERSION = '1.0.0';
+    const VERSION = '2.3.7';
 
     /**
      * The application path.
