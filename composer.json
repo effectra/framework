@@ -19,7 +19,6 @@
     "minimum-stability": "stable",
     "require": {
         "guzzlehttp/guzzle": "^7.7",
-        "bmt/plural-converter": "^1.0",
         "php-di/php-di": "^7.0",
         "symfony/console": "^6.0",
         "symfony/var-dumper": "^6.0",
@@ -50,6 +49,8 @@
         "vlucas/valitron": "^1.4",
         "effectra/cache": "^1.0",
         "league/climate": "^3.8",
-        "effectra/sql-query": "^2.0"
+        "effectra/sql-query": "^2.0",
+        "effectra/tracker": "^1.0",
+        "bmt/noun-converter": "^1.0"
     }
 }
