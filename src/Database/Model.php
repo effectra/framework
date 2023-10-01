@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Effectra\Core\Database;
 
 use Bmt\NounConverter\NounConverter;
+use Effectra\Core\Application;
 use Effectra\Database\Data\DataRules;
+use Effectra\Database\DB;
 
 /**
  * Class Model
@@ -14,7 +16,7 @@ use Effectra\Database\Data\DataRules;
  */
 class Model
 {
-	protected static  $table = "default";
+    protected static  $table = "default";
 
     /**
      * @param array $data represent model data
@@ -63,7 +65,7 @@ class Model
      */
     public static function getTableName(): string
     {
-        if(static::$table !== 'default'){
+        if (static::$table !== 'default') {
             return static::$table;
         }
         $modelClass = new static;
@@ -79,5 +81,19 @@ class Model
     public function collection(): ModelCollection
     {
         return new ModelCollection($this->data);
+    }
+
+    public function transaction($tableName, $callback)
+    {
+        $db = Application::container()->get(DB::class);
+        try {
+            $db()->beginTransaction();
+            call_user_func($callback, $tableName, $callback);
+            $db()->commit();
+        } catch (\Throwable $e) {
+            if ($db()->inTransaction()) {
+                throw new \Exception($e->getMessage());
+            }
+        }
     }
 }
