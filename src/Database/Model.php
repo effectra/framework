@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Database;
 
+use Bmt\NounConverter\NounConverter;
 use Effectra\Database\Data\DataRules;
 
 /**
@@ -13,7 +14,8 @@ use Effectra\Database\Data\DataRules;
  */
 class Model
 {
-    protected static string $table = "";
+	protected static  $table = "default";
+
     /**
      * @param array $data represent model data
      */
@@ -37,9 +39,13 @@ class Model
      */
     final public static function getDataRules(): ?DataRules
     {
-        if (static::display() instanceof DataRules) {
-            return static::display();
+        $dataRules = static::display();
+        if ($dataRules instanceof DataRules) {
+            return  $dataRules;
         }
+
+        $dataRules->integer('id');
+
         return null;
     }
 
@@ -57,7 +63,12 @@ class Model
      */
     public static function getTableName(): string
     {
-        return static::$table;
+        if(static::$table !== 'default'){
+            return static::$table;
+        }
+        $modelClass = new static;
+        $model = substr(get_class($modelClass), strrpos(get_class($modelClass), '\\') + 1);
+        return strtolower((new NounConverter())->convertToPlural($model));
     }
 
     /**
