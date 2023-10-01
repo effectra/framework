@@ -51,9 +51,10 @@ class Migration
         $appliedMigrations = $this->getAppliedMigrations();
 
         $dir = $this->dir();
-        $files = Directory::files($dir);
+        $files = $act == 'up'? Directory::files($dir) : array_reverse(Directory::files($dir));
 
         if ($act == 'down') {
+            $files = array_reverse($files);
             $appliedMigrationsAsDown = array_filter($appliedMigrations, fn ($m) =>  $m['type'] == 'down' && $m['migration']);
             $migrationFilesDown = array_map(fn ($m) => $m['migration'], $appliedMigrationsAsDown);
 
