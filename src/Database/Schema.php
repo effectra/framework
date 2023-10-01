@@ -6,7 +6,6 @@ namespace Effectra\Core\Database;
 
 use Effectra\Core\Facades\DB;
 use Effectra\SqlQuery\Query;
-use Effectra\SqlQuery\Table;
 
 /**
  * The Schema class provides methods for creating and modifying database tables.
@@ -42,7 +41,41 @@ class Schema
      */
     public static function table(string $tableName, callable $callback)
     {
+        if(!static::tableExists($tableName)){
+            throw new \Exception("Table '$tableName' not exists");
+        }
         $query = Query::updateTable($tableName, $callback);
-        DB::query($query)->run();
+
+        $listColumnsUpdated = array_unique(array_map(fn ($item) => $item['column_name'], $query->getAttribute('cols') ?? []));
+
+        foreach ($listColumnsUpdated as $col) {
+            if (in_array($col, static::listOfColumns($tableName))) {
+                return;
+            }
+        }
+
+        DB::query((string) $query)->run();
+    }
+
+    /**
+     * get list columns of a table.
+     * @param string $tableName The name of the table to modify.
+     * @return array
+     */
+    public static function listOfColumns(string $tableName): array
+    {
+        $listColumnsQuery = Query::info()->listColumns($tableName);
+
+        $data = DB::query((string) $listColumnsQuery)->fetch();
+
+        return $data ? array_map(fn ($item) => $item['Field'], $data) : [];
+    }
+
+    public static function tableExists(string $tableName): bool
+    {
+        $query = Query::info()->tableExists($tableName);
+        $data = DB::query((string) $query)->fetch();
+
+        return empty($data) ? false : true;
     }
 }
