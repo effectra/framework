@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Database;
 
-use Effectra\Core\Facades\DB;
+use Effectra\Database\DB;
 use Effectra\SqlQuery\Query;
 
 /**
@@ -12,6 +12,11 @@ use Effectra\SqlQuery\Query;
  */
 class Schema
 {
+
+    public static function db(): DB
+    {
+        return app()->container()->get(DB::class);
+    }
     /**
      * Create a new database table.
      *
@@ -29,7 +34,7 @@ class Schema
         if ($exists === false) {
             $query->ifNotExists();
         }
-        DB::query((string) $query)->run();
+        static::db()->query((string) $query)->run();
     }
 
     /**
@@ -41,7 +46,7 @@ class Schema
      */
     public static function table(string $tableName, callable $callback)
     {
-        if(!static::tableExists($tableName)){
+        if (!static::tableExists($tableName)) {
             throw new \Exception("Table '$tableName' not exists");
         }
         $query = Query::updateTable($tableName, $callback);
@@ -54,7 +59,7 @@ class Schema
             }
         }
 
-        DB::query((string) $query)->run();
+        static::db()->query((string) $query)->run();
     }
 
     /**
@@ -66,15 +71,20 @@ class Schema
     {
         $listColumnsQuery = Query::info()->listColumns($tableName);
 
-        $data = DB::query((string) $listColumnsQuery)->fetch();
+        $data = static::db()->query((string) $listColumnsQuery)->fetch();
 
         return $data ? array_map(fn ($item) => $item['Field'], $data) : [];
     }
 
+    /**
+     * check if table exists in db
+     * @param string $tableName The name of the table to modify.
+     * @return bool
+     */
     public static function tableExists(string $tableName): bool
     {
         $query = Query::info()->tableExists($tableName);
-        $data = DB::query((string) $query)->fetch();
+        $data = static::db()->query((string) $query)->fetch();
 
         return empty($data) ? false : true;
     }
