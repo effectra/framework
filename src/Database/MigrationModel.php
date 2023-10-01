@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Database;
 
-class MigrationModel 
+class MigrationModel extends Model
 {
     use ModelBase;
 
