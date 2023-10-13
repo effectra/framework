@@ -29,5 +29,4 @@ class AppMiddleware
 
         return $type ? $middlewares[$type] : $middlewares;
     }
-    
 }
