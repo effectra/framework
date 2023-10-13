@@ -120,7 +120,7 @@ class Upload
         foreach ($this->files as $key => $file) {
 
             if (!in_array(File::extension($file->getClientFilename()), AppUpload::getTypes())) {
-                throw new UploadException("This Format Type '" . File::extension($file) . "' not allowed");
+                throw new UploadException("This Format Type '" . File::extension($file->getClientFilename()) . "' not allowed");
             }
 
             if ($file->getSize() > AppUpload::getMaxSize()) {
@@ -144,6 +144,7 @@ class Upload
                 'file_name'      => $fileName,
                 'uploaded'       => $isMoved,
                 'file_path'      => $distention,
+                'file_url'      => $_ENV['APP_URL'] .'/'. str_replace(Application::publicPath(),'',$distention),
                 'extension'      => File::exists($distention) ? File::extension($distention) : null,
                 'media_type'     => $file->getClientMediaType(),
                 'size'           => $file->getSize(),
@@ -225,7 +226,7 @@ class Upload
         $base = log($size, 1024);
         $suffixes = array('', 'K', 'M', 'G', 'T');
 
-        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
+        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)].'B';
     }
 
 }
