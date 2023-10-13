@@ -34,7 +34,7 @@ class Application
     /**
      * The version of the application.
      */
-    const VERSION = '2.3.7';
+    const VERSION = '2.3';
 
     /**
      * The application path.
@@ -255,7 +255,7 @@ class Application
      */
     public function getMiddlewares(string $type = 'web'): array
     {
-        $middlewares = $this->appCore->middlewares[$type] + AppMiddleware::get($type);
+        $middlewares =  AppMiddleware::get($type) + $this->appCore->middlewares[$type];
 
         $middlewaresInstant =  array_map(function ($middleware) {
             return DiClasses::load($middleware);
@@ -317,8 +317,6 @@ class Application
         $router->register();
 
         $response = $router->handle($request);
-
-        $response = Cors::process($request, $response);
 
         static::container()->set(Route::class, $router->getRouter());
 
