@@ -86,12 +86,27 @@ class View
         ))->send();
     }
 
-    public function renderFromPublic(string $view, bool $is_folder = true)
+    /**
+     * Render a view from public folder
+     * @param string $view The path to the view file.
+     * @param bool $is_folder if view is folder add `index.html` to view path
+     * @return string The rendered HTML content of view.
+     * 
+     */
+    public function renderFromPublic(string $view, bool $is_folder = true, string $view_extension = 'html'): string
     {
-        $filePath = "";
+        $filePath =  Application::publicPath($view);
+
         if ($is_folder && !strpos('index.html', $view)) {
-            $filePath =  Application::publicPath("$view/index.html");
+            $filePath =  Application::publicPath(
+                sprintf('%s.%s', Path::format("$view/index"), $view_extension)
+            );
         }
+
+        if (!File::exists($filePath)) {
+            throw new \Exception("Error Processing View, $view file/folder not exists ,at full path: $filePath");
+        }
+
         return Minify::html(File::getContent($filePath));
     }
 }
