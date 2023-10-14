@@ -6,6 +6,7 @@ namespace Effectra\Core;
 
 use Effectra\Config\ConfigFile;
 use Effectra\Core\View\ViewConfigs;
+use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\Minifyer\Minify;
 use Effectra\Renova\Reader;
@@ -30,7 +31,6 @@ class View
         protected Reader $reader,
         protected ConfigFile $config
     ) {
-
     }
 
     /**
@@ -84,5 +84,14 @@ class View
             ViewConfigs::templateGlobalVars(),
             $this->reader
         ))->send();
+    }
+
+    public function renderFromPublic(string $view, bool $is_folder = true)
+    {
+        $filePath = "";
+        if ($is_folder && !strpos('index.html', $view)) {
+            $filePath =  Application::publicPath("$view/index.html");
+        }
+        return Minify::html(File::getContent($filePath));
     }
 }
