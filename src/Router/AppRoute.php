@@ -31,6 +31,30 @@ class AppRoute
     }
 
     /**
+     * rebuild request by base url from APP_URL env
+     * @param ServerRequestInterface  $request  The request object.
+     * @return ServerRequestInterface  $request  The new request object.
+     */
+    public function rebuildRequest(ServerRequestInterface $request): ServerRequestInterface
+    {
+        if (isset($_ENV['APP_URL'])) {
+            $uri = new Uri($_ENV['APP_URL']);
+
+            $requestUri = $request->getUri();
+
+            $newPath = str_replace($uri->getPath(), '/', $requestUri->getPath());
+
+            if ($newPath === '') {
+                $newPath = '/';
+            }
+
+            $request = $request->withUri($uri->withPath($newPath));
+        }
+
+        return $request;
+    }
+
+    /**
      * Get the underlying router instance.
      *
      * @return Route The router instance.
@@ -105,28 +129,18 @@ class AppRoute
             $this->router->setContainer(Application::container());
         }
 
-        if(isset($_ENV['APP_URL'])){
-            $uri = new Uri($_ENV['APP_URL']);
-
-            $requestUri = $request->getUri();
-    
-            $newPath = str_replace($uri->getPath(),'/',$requestUri->getPath());
-    
-            if($newPath === ''){
-                $newPath = '/';
-            }
-
-            $request = $request->withUri($uri->withPath($newPath));
-        }
-
         if ($this->endpoint === 'api') {
             $this->router->setNotFound(function () {
                 return response()->json([
                     'message' => 'The requested resource was not found on this server.'
                 ],404);
             });
+            $this->router->setInternalServerError(function () {
+                return response()->json([
+                    'message' => 'internal server error.'
+                ],503);
+            });
         }
-
 
         $response = $this->router->dispatch($request);
 

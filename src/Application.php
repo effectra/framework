@@ -10,7 +10,6 @@ use Effectra\Config\ConfigFile;
 use Effectra\Core\Console\AppConsole;
 use Effectra\Core\Container\DiClasses;
 use Effectra\Core\Error\AppError;
-use Effectra\Core\Http\Cors;
 use Effectra\Core\Log\AppLogger;
 use Effectra\Core\Middlewares\AppMiddleware;
 use Effectra\Core\Router\AppRoute;
@@ -307,6 +306,8 @@ class Application
 
         // Handle Router
         $router = new AppRoute(new Route(), $typeEndpoint);
+
+        $request = $router->rebuildRequest($request);
 
         // Set Request & Response for controller
         $router->set(
