@@ -8,6 +8,7 @@ use Effectra\Config\ConfigFile;
 use Effectra\Core\Application;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * The Cors class handles CORS (Cross-Origin Resource Sharing) headers for HTTP requests.
@@ -32,12 +33,14 @@ class CorsMiddleware
      * Process the CORS headers for the given request and response.
      *
      * @param ServerRequestInterface $request  The HTTP request.
-     * @param ResponseInterface      $response The HTTP response.
+     * @param RequestHandlerInterface $handler The HTTP request handler.
      *
      * @return ResponseInterface The updated HTTP response with CORS headers.
      */
-    public static function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public static function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = $handler->handle($request);
+
         $cors = static::getConfig();
         $origin = $request->getHeaderLine('Origin');
         $headers = $request->getHeaderLine('Access-Control-Request-Headers');
