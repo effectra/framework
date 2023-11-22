@@ -142,6 +142,6 @@ class AppDatabase
     {
         $driver = static::getDriverDefault();
         $config = static::getDriver($driver);
-        return new Connection($driver, $config);
+        return new Connection($config);
     }
 }
