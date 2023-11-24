@@ -26,9 +26,9 @@
         "psr/http-message": "^2.0",
         "effectra/config": "^1.0",
         "effectra/contracts": "^1.0",
-        "effectra/db": "^2.1",
+        "effectra/db": "^3.0",
         "effectra/clock": "^1.0",
-        "effectra/fs": "2.0",
+        "effectra/fs": "*",
         "effectra/http-message": "^1.0",
         "effectra/http-foundation": "^1.0",
         "effectra/http-factory": "^1.0",
@@ -51,6 +51,8 @@
         "league/climate": "^3.8",
         "effectra/sql-query": "^2.0",
         "effectra/tracker": "^1.0",
-        "bmt/noun-converter": "^1.0"
+        "bmt/noun-converter": "^1.0",
+        "psr/event-dispatcher": "^1.0",
+        "effectra/event-dispatcher":"^1.0"
     }
 }
