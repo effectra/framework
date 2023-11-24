@@ -4,7 +4,7 @@ namespace Effectra\Core\View;
 
 use Effectra\Core\Application;
 use Effectra\Core\EncoreProvider\WebpackEncore;
-use Effectra\Core\Request;
+use Effectra\Core\Facades\Request;
 use Effectra\Fs\Path;
 use Effectra\Link\Link;
 use Effectra\Link\LinkProvider;
@@ -44,6 +44,22 @@ class ViewConfigs
                 $file = Path::format($file);
                 $path = Application::viewPath($file . '.php');
                 return (new Reader())->file($path, $data);
+            }],
+            ['web_encore_js' => function ($file) {
+                try {
+                    $webpackEncore = new WebpackEncore();
+                  return  $webpackEncore->scriptTags($file);
+                } catch (\Exception $e) {
+                    return 'WEB_ENCORE_JS: error('. $e->getMessage() .')';
+                }
+            }],
+            ['web_encore_css' => function ($file) {
+                try {
+                    $webpackEncore = new WebpackEncore();
+                  return  $webpackEncore->linkTags($file);
+                } catch (\Exception $e) {
+                    return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';
+                }
             }]
         ];
     }
@@ -58,23 +74,8 @@ class ViewConfigs
 
         return [
             ['CSRF' => (string) Application::container()->get(Csrf::class)->insertHiddenToken()],
-            ['APP_NAME' => $_ENV['APP_NAME'] ?? APP_NAME],
-            ['WEB_ENCORE_JS' => function () {
-                try {
-                    $webpackEncore = new WebpackEncore();
-                  return  $webpackEncore->scriptTags('app');
-                } catch (\Exception $e) {
-                    return 'WEB_ENCORE_JS error('. $e->getMessage() .')';
-                }
-            }],
-            ['WEB_ENCORE_CSS' => function () {
-                try {
-                    $webpackEncore = new WebpackEncore();
-                  return  $webpackEncore->linkTags('app');
-                } catch (\Exception $e) {
-                    return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';
-                }
-            }],
+            ['APP_NAME' => $_ENV['APP_NAME'] ?? ''],
+            
         ];
     }
 }
