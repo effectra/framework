@@ -2,6 +2,7 @@
 
 use Effectra\Core\Application;
 use Effectra\Core\Client;
+use Effectra\Core\Http\RedirectResponse;
 use Effectra\Core\Localization;
 use Effectra\Core\Request;
 use Effectra\Core\Response;
@@ -11,6 +12,7 @@ use Effectra\Fs\Path;
 use Effectra\Fs\Type\Json;
 use Effectra\Mail\MailerService;
 use Effectra\Router\Route;
+use Effectra\Session\Contracts\SessionInterface;
 use Effectra\Session\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
@@ -198,9 +200,9 @@ if (!function_exists('session')) {
     /**
      * Get the session instance.
      *
-     * @return Session The session instance.
+     * @return SessionInterface The session instance.
      */
-    function session(): Session
+    function session(): SessionInterface
     {
         return Application::container()->get(Session::class);
     }
@@ -244,7 +246,7 @@ if (!function_exists('redirect')) {
      */
     function redirect(string $url, int $statusCode = 302): ResponseInterface
     {
-        return response()->redirect($url, $statusCode);
+        return new RedirectResponse($url,$statusCode);
     }
 }
 
