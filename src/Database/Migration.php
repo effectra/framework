@@ -47,29 +47,32 @@ class Migration
      */
     public function applyMigrations($act = 'up'): void
     {
+        try {
+            $appliedMigrations = $this->getAppliedMigrations();
+            
+            $dir = $this->dir();
+            $files = $act == 'up' ? Directory::files($dir) : array_reverse(Directory::files($dir));
 
-        $appliedMigrations = $this->getAppliedMigrations();
+            if ($act == 'down') {
+                $files = array_reverse($files);
+                $appliedMigrationsAsDown = array_filter($appliedMigrations, fn ($m) =>  $m['type'] == 'down' && $m['migration']);
+                $migrationFilesDown = array_map(fn ($m) => $m['migration'], $appliedMigrationsAsDown);
 
-        $dir = $this->dir();
-        $files = $act == 'up'? Directory::files($dir) : array_reverse(Directory::files($dir));
+                foreach ($appliedMigrations as $appliedMigration) {
+                    if ($appliedMigration['type'] === 'up' && !in_array($appliedMigration['migration'], $migrationFilesDown)) {
+                        $this->migrateWithLog($appliedMigration['migration'], $act);
+                    }
+                }
+            } elseif ($act == 'up') {
+                $migrationFiles = array_map(fn ($m) => $m['migration'], $appliedMigrations);
+                $toApplyMigrations = empty($migrationFiles) ? $files : array_diff($files, $migrationFiles);
 
-        if ($act == 'down') {
-            $files = array_reverse($files);
-            $appliedMigrationsAsDown = array_filter($appliedMigrations, fn ($m) =>  $m['type'] == 'down' && $m['migration']);
-            $migrationFilesDown = array_map(fn ($m) => $m['migration'], $appliedMigrationsAsDown);
-
-            foreach ($appliedMigrations as $appliedMigration) {
-                if ($appliedMigration['type'] === 'up' && !in_array($appliedMigration['migration'], $migrationFilesDown)) {
-                    $this->migrateWithLog($appliedMigration['migration'], $act);
+                foreach ($toApplyMigrations as $migration) {
+                    $this->migrateWithLog($migration, $act);
                 }
             }
-        } elseif ($act == 'up') {
-            $migrationFiles = array_map(fn ($m) => $m['migration'], $appliedMigrations);
-            $toApplyMigrations = empty($migrationFiles) ? $files : array_diff($files, $migrationFiles);
-
-            foreach ($toApplyMigrations as $migration) {
-                $this->migrateWithLog($migration, $act);
-            }
+        } catch (\Throwable $th) {
+            dd($th);
         }
     }
 
@@ -103,7 +106,7 @@ class Migration
      */
     private function save(string $migration, string $act): void
     {
-        MigrationModel::data(['migration' => $migration, 'type' => $act])->create();
+        MigrationModel::create([['migration' => $migration, 'type' => $act]]);
     }
 
     /**
@@ -130,19 +133,11 @@ class Migration
      */
     private function getAppliedMigrations(): array
     {
-        $query = (string) Query::select('migrations')->columns(['migration', 'type']);
-
-        $migrations =  DB::query((string) $query)->fetch();
-
-        $applied = [];
-
-        if (!empty($migrations)) {
-            foreach ($migrations as $m) {
-                $applied[] = $m;
-            }
+        $migrations = [];
+        foreach (MigrationModel::all(['migration', 'type']) as $item) {
+            $migrations[] = $item->toArray();
         }
-
-        return $applied;
+        return $migrations;
     }
 
     /**
@@ -165,12 +160,8 @@ class Migration
      */
     public function emptyMigration(): bool
     {
-        $query =  Query::truncate('migrations');
-        $result = DB::query((string) $query)->run();
-
-        return $result;
+        return MigrationModel::truncate();
     }
-
 
     /**
      * Apply the migration defined in the given migration file.
@@ -232,10 +223,10 @@ class Migration
      * @param string $act The action to check against (up or down).
      * @return bool True if the migration has been migrated with the specified action, false otherwise.
      */
-    public function isMigrated($file, $act): bool
+    public function isMigrated(string $file,string $act): bool
     {
         foreach ($this->getAppliedMigrations() as $m) {
-            if ($m['type'] == $act && $file == $m['migration']) {
+            if ($m->type == $act && $file == $m->migration) {
                 return true;
             }
         }

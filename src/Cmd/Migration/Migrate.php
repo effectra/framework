@@ -6,6 +6,7 @@ namespace Effectra\Core\Cmd\Migration;
 
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Database\Migration;
+use Effectra\Core\Database\MigrationModel;
 use Effectra\Core\Log\ConsoleLogTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

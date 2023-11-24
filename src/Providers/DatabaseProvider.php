@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Providers;
 
+use Effectra\Core\Application;
 use Effectra\Core\Container\ServiceProvider;
 use Effectra\Core\Contracts\ProviderInterface;
 use Effectra\Core\Contracts\ServiceInterface;
 use Effectra\Core\Database\AppDatabase;
 use Effectra\Database\DB;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class DatabaseProvider  extends ServiceProvider implements ServiceInterface
 {
@@ -17,11 +19,9 @@ class DatabaseProvider  extends ServiceProvider implements ServiceInterface
         $provider->bind(DB::class, function () {
 
             $conn = AppDatabase::connect();
-
-            $driver = AppDatabase::getDriverDefault();
-
-            $db = new DB($driver, $conn->connect());
-
+            $db = new DB();
+            DB::createConnection($conn);
+            DB::setEventDispatcher(Application::container()->get(EventDispatcherInterface::class));
             return $db;
         });
     }
