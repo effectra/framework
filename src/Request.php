@@ -25,9 +25,9 @@ class Request extends RequestExtension
 
     /**
      * @param ServerRequestInterface $request Server Request instance
-     * @return static
+     * @return self
      */
-    public static function convertRequest(ServerRequestInterface $request): static
+    public static function convertRequest(ServerRequestInterface $request): self
     {
         $new = new static(
             $request->getMethod(),
@@ -76,7 +76,7 @@ class Request extends RequestExtension
      */
     public function validateInputs(): Validator
     {
-        $data = $this->inputs();
+        $data = (array) $this->inputs();
         return new Validator($data);
     }
     
