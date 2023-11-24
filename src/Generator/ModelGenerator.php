@@ -20,14 +20,10 @@ class ModelGenerator implements GeneratorInterface
         return $class
             ->withNameSpace($namespace)
             ->withPackages([
+                'Effectra\Core\Database\Model',
                 'Effectra\Core\Database\ModelBase',
             ])
-            ->withVariable(
-                name: 'table',
-                static: true,
-                defaultValue: $option['tableName'],
-                typeVar: ''
-            )
+            ->withExtends('Model')
             ->withTraits([
                 'ModelBase'
             ])
