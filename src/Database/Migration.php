@@ -226,7 +226,7 @@ class Migration
     public function isMigrated(string $file,string $act): bool
     {
         foreach ($this->getAppliedMigrations() as $m) {
-            if ($m->type == $act && $file == $m->migration) {
+            if ($m['type'] == $act && $file == $m['migration']) {
                 return true;
             }
         }
