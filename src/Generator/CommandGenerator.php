@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Effectra\Core\Generator;
 
@@ -9,32 +11,44 @@ use Effectra\Generator\GeneratorClass;
 class CommandGenerator implements GeneratorInterface
 {
 
-    public static function make(string $className,string $savePath,array $option = []):int|false
+    public static function make(string $className, string $savePath, array $option = []): int|false
     {
         $namespace = $option['namespace'] ? 'App\Commands' . $option['namespace'] : 'App\Commands';
         $class = new GeneratorClass(new Creator(), $className);
+
+        $name = strtolower($option['command_name']);
+        $description = "this is description";
+
+        $content  = sprintf('$this->setName("%s")->setDescription("%s");', $name, $description);
+
         return $class
             ->setName($className)
             ->withNameSpace($namespace)
             ->withPackages([
-                'Effectra\Core\Command'
+                'Effectra\Core\Console\Command',
+                'Symfony\Component\Console\Input\InputInterface',
+                'Symfony\Component\Console\Output\OutputInterface',
             ])
             ->withExtends('Command')
+            
             ->withMethod(
-                typeFunction: 'public',
-                name: 'configure',
-                args: [],
-                return: 'void',
+                'public',
+                false,
+                'execute',
+                [],
+                'int',
+                "\treturn 0;"
             )
+            ->withArgument('execute', 'InputInterface', 'input')
+            ->withArgument('execute', 'OutputInterface', 'output')
             ->withMethod(
-                typeFunction: 'public',
-                name: 'execute',
-                args: [],
-                return: 'int',
-                content: "\treturn 0;"
+                'public',
+                false,
+                'configure',
+                [],
+                'void',
+                $content
             )
-            ->withArgument('execute', '', 'input')
-            ->withArgument('execute', '', 'output')
             ->generate()
             ->save($savePath);
     }
