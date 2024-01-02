@@ -28,6 +28,7 @@ class AppRoute
      */
     public function __construct(protected Route $router,protected string $endpoint)
     {
+        $router::setContainer(Application::container());
     }
 
     /**
@@ -35,7 +36,7 @@ class AppRoute
      * @param ServerRequestInterface  $request  The request object.
      * @return ServerRequestInterface  $request  The new request object.
      */
-    public function rebuildRequest(ServerRequestInterface $request): ServerRequestInterface
+    public function rebuildRequestUri(ServerRequestInterface $request): ServerRequestInterface
     {
         if (isset($_ENV['APP_URL'])) {
             $uri = new Uri($_ENV['APP_URL']);
@@ -125,10 +126,6 @@ class AppRoute
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         
-        if(method_exists($this->router,'setContainer')){
-            $this->router->setContainer(Application::container());
-        }
-
         if ($this->endpoint === 'api') {
             $this->router->setNotFound(function () {
                 return response()->json([
