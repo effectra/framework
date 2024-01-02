@@ -34,13 +34,13 @@ class GenerateCommand extends Command
 
         $io = new ConsoleBlock($input, $output);
 
-        $io->info('Generate View File');
+        $io->info('Generate Command');
 
         $name = $input->getArgument('name');
 
         $path = Application::appPath('app' . Path::ds() . 'Commands');
 
-        $config = new ConfigureFile('Commands', $name, $path);
+        $config = new ConfigureFile('Command', $name, $path);
 
         $className =  $config->toClassName($name);
 
@@ -54,7 +54,8 @@ class GenerateCommand extends Command
         }
 
         $option = [
-            'namespace' => $config->getNameSpace()
+            'namespace' => $config->getNameSpace(),
+            'command_name' => $name
         ];
 
         $state = CommandGenerator::make($className, $savePath, $option);
