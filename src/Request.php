@@ -29,7 +29,7 @@ class Request extends RequestExtension
      */
     public static function convertRequest(ServerRequestInterface $request): self
     {
-        $new = new static(
+        $new = new self(
             $request->getMethod(),
             $request->getUri(),
             $request->getHeaders(),
@@ -45,39 +45,13 @@ class Request extends RequestExtension
     }
 
     /**
-     * Returns an object containing all input data, including query params,
-     * POST data, and input stream data.
-     *
-     * @return object An object of input data.
-     */
-    public function inputs(): object
-    {
-        $request = $this->convertRequest(static::fromGlobal());
-
-        // Get query params
-        $getParams = $request->getQueryParams();
-
-        // Get POST data
-        $postParams = $request->getParsedBody();
-
-        // Get input stream data
-        $inputData = $request->parseJsonFromBody() ?? []; 
-
-        // Merge all params into a single array
-        $params = array_merge($getParams, $postParams, $inputData);
-
-        return (object) $params;
-    }
-
-    /**
      * Validates input data using a third-party validation library.
      *
      * @return Validator A Validator object representing the validation results.
      */
     public function validateInputs(): Validator
     {
-        $data = (array) $this->inputs();
-        return new Validator($data);
+
+        return new Validator($this->data());
     }
-    
 }
