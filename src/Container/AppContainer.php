@@ -2,12 +2,10 @@
 
 namespace Effectra\Core\Container;
 
-use DI\Container;
+
 use DI\ContainerBuilder;
-use Effectra\Core\Application;
 use Effectra\Core\Container\Provider;
-use Effectra\Fs\Directory;
-use Effectra\Fs\Path;
+use Psr\Container\ContainerInterface;
 
 /**
  * The application container for managing dependency injection and service providers.
@@ -17,9 +15,9 @@ class AppContainer
     /**
      * The DI container instance.
      *
-     * @var Container
+     * @var ContainerInterface
      */
-    protected Container $container;
+    protected ContainerInterface $container;
 
     /**
      * The DI container builder instance.
@@ -83,12 +81,9 @@ class AppContainer
     {
 
         // $cache_dir = Application::appPath('bootstrap' . Path::ds() . 'cache' .  Path::ds() );
-        /**
-         * if you uncomment this line database operations not be working
-         */
+       
         // $this->containerBuilder->enableCompilation($cache_dir);
         // $this->containerBuilder->writeProxiesToFile(true, $cache_dir . '/proxies');
-
 
         $this->registerProviders();
 
@@ -148,23 +143,11 @@ class AppContainer
     /**
      * Get the container instance.
      *
-     * @return Container The container instance.
+     * @return ContainerInterface The container instance.
      */
-    public function container(): Container
+    public function container(): ContainerInterface
     {
         return $this->container;
     }
 
-    /**
-     * Bind application classes to the container.
-     *
-     * @return void
-     */
-    public function bindAppClasses(): void
-    {
-        $controllers = Application::appPath('Controllers');
-        foreach (Directory::files($controllers) as $controller) {
-            $this->bind([$controller::class => new $controller()]);
-        }
-    }
 }
