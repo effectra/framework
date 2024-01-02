@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Effectra\Core;
 
 use App\AppCore;
-use DI\Container;
 use Effectra\Config\ConfigFile;
 use Effectra\Core\Console\AppConsole;
-use Effectra\Core\Container\DiClasses;
+use Effectra\Core\Contracts\ContainerInterface as ContractsContainerInterface;
 use Effectra\Core\Error\AppError;
+use Effectra\Core\Events\ResponseEvent;
 use Effectra\Core\Log\AppLogger;
 use Effectra\Core\Middlewares\AppMiddleware;
 use Effectra\Core\Router\AppRoute;
@@ -18,7 +18,12 @@ use Effectra\Fs\Path;
 use Effectra\Http\Foundation\ResponseFoundation;
 use Effectra\Http\Server\RequestHandler;
 use Effectra\Log\Logger;
+use Effectra\Router\Resolver;
 use Effectra\Router\Route;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -45,9 +50,9 @@ class Application
     /**
      * The container instance.
      *
-     * @var Container
+     * @var ContainerInterface
      */
-    protected static Container $container;
+    protected static ContainerInterface $container;
 
     /**
      * The current request.
@@ -70,6 +75,8 @@ class Application
      */
     protected $duration;
 
+    protected $appError;
+
     /**
      * Application constructor.
      *
@@ -81,8 +88,6 @@ class Application
         $this->duration = new DurationCalculator();
         $this->duration->start();
     }
-
-
 
     /**
      * Set the application path.
@@ -99,7 +104,7 @@ class Application
      *
      * @return array The app configuration.
      */
-    private static function getConfig()
+    public static function getConfig()
     {
         $file = Application::configPath('app.php');
         $configFile = new ConfigFile($file);
@@ -116,21 +121,51 @@ class Application
     /**
      * Get the container instance.
      *
-     * @return Container The container instance.
+     * @return ContainerInterface|ContractsContainerInterface The container instance.
      */
-    public static function container(): Container
+    public static function container(): ContainerInterface|ContractsContainerInterface
     {
         return static::$container;
     }
 
     /**
+     * Finds an entry of the container by its identifier and returns it.
+
+     * @param string $id Identifier of the entry to look for.
+
+     * @return mixed Entry.
+
+     * @throws NotFoundExceptionInterface No entry was found for this identifier.
+
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     * 
+     */
+    public static function get($id)
+    {
+        static::container()->get($id);
+    }
+
+    /**
+     * Define an object or a value in the container.
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public static function set(string $name, mixed $value)
+    {
+        $c =  static::container()->set($name, $value);
+        static::$container = $c;
+    }
+
+    /**
      * Set the container instance.
      *
-     * @param Container $container The container instance.
+     * @param ContainerInterface $container The container instance.
      */
-    public function setContainer(Container $container): void
+    public function setContainer(ContainerInterface $container): void
     {
         static::$container = $container;
+        Resolver::setContainer(static::container());
     }
 
     /**
@@ -254,10 +289,10 @@ class Application
      */
     public function getMiddlewares(string $type = 'web'): array
     {
-        $middlewares =  AppMiddleware::get($type) + $this->appCore->middlewares[$type];
+        $middlewares = AppMiddleware::get($type) + $this->appCore->middlewares[$type];
 
         $middlewaresInstant =  array_map(function ($middleware) {
-            return DiClasses::load($middleware);
+            return Resolver::resolveClass($middleware);
         }, $middlewares);
 
         return $middlewaresInstant;
@@ -275,6 +310,16 @@ class Application
         return (bool) strpos($path, 'api/');
     }
 
+
+    /**
+     * get app Event Dispatcher
+     * @return EventDispatcherInterface
+     */
+    public static function eventDispatcher(): EventDispatcherInterface
+    {
+        return static::container()->get(EventDispatcherInterface::class);
+    }
+
     /**
      * Handle the incoming HTTP request.
      *
@@ -283,18 +328,21 @@ class Application
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $this->appError = new AppError();
+        $this->appError->setLogger($this->log());
+
         $typeEndpoint = $this->isApiPath($request) ? 'api' : 'web';
-        // Handle Errors
-        AppError::handler($typeEndpoint);
 
-        // Handle Middlewares
+        $this->appError->handle($typeEndpoint);
 
-        if ($typeEndpoint === 'api') {
-            $middlewares = $this->getMiddlewares('api');
-        } else {
+        $router = new AppRoute(new Route(), $typeEndpoint);
+
+        if ($typeEndpoint === 'web') {
+
             $middlewares = $this->getMiddlewares();
+        } else {
+            $middlewares = $this->getMiddlewares('api');
         }
-
 
         $response = new Response();
 
@@ -304,12 +352,9 @@ class Application
 
         $response = $handler->handle($request);
 
-        // Handle Router
-        $router = new AppRoute(new Route(), $typeEndpoint);
 
-        $request = $router->rebuildRequest($request);
+        $request = $router->rebuildRequestUri($request);
 
-        // Set Request & Response for controller
         $router->set(
             $request,
             $response
@@ -321,6 +366,8 @@ class Application
 
         static::container()->set(Route::class, $router->getRouter());
 
+        $this->eventDispatcher()->dispatch(new ResponseEvent($request, $response));
+
         return $response;
     }
 
@@ -329,38 +376,13 @@ class Application
      */
     public function console(): void
     {
-        // Handle Errors
-        AppError::handler();
+        $this->appError = new AppError($this->log());
+
+        $this->appError->handle('cli');
 
         $console = new AppConsole();
 
         $console->execute();
-    }
-
-    /**
-     * Capture the current request and response.
-     *
-     * @param ServerRequestInterface $request The server request instance.
-     * @param ResponseInterface $response The response instance.
-     */
-    public function capture(ServerRequestInterface $request, ResponseInterface $response): void
-    {
-        static::$request = $request;
-        static::$response = $response;
-    }
-
-    /**
-     * Get the captured request and response.
-     *
-     * @return object The captured request and response as an object.
-     */
-    public static function getCaptures(): object
-    {
-        return (object) [
-            'path' => static::$APP_PATH,
-            'request' =>  static::$response,
-            'response' =>  static::$response,
-        ];
     }
 
     /**
