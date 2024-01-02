@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Cmd\Router;
 
+use Closure;
 use Effectra\Core\Application;
 use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Fs\File;
@@ -24,7 +25,7 @@ class Routes extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log($this->getName(),__FILE__);
+        $this->log($this->getName(), __FILE__);
 
         $table = new Table($output);
 
@@ -51,12 +52,39 @@ class Routes extends Command
         // Add rows to the table
         foreach ($router->routes() as $route) {
             $url = $route['pre_pattern'] !==  '' ? ($route['pre_pattern'] . '/'  . $route['pattern']) : $route['pattern'];
-            $table->addRow([str_replace('//', '/', $url), $route['method'], $route['name'], $route['controller'], $route['controller_method'], join("\n", $route['middleware'])]);
+            $table->addRow(
+                [
+                    str_replace('//', '/', $url),
+                    $route['method'], $route['name'],
+                    $this->getControllerName($route['controller']),
+                    $route['controller_method'],
+                    $this->getMiddlewaresName($route['middleware'])
+                ]
+            );
         }
 
         // Render the table
         $table->render();
 
         return 0;
+    }
+
+    public function getMiddlewaresName($middlewares)
+    {
+        $names = array_map(function ($m) {
+            $name_arr = explode('\\', $m);
+           return end($name_arr);
+        }, $middlewares);
+
+        return join("\n", $names);
+    }
+
+    public function getControllerName($controller)
+    {
+        if(is_string($controller)){
+            $name_arr = explode('\\', $controller);
+            return end($name_arr);
+        }
+        return ':Closure';
     }
 }
