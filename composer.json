@@ -32,9 +32,9 @@
         "effectra/http-message": "^1.0",
         "effectra/http-foundation": "^1.0",
         "effectra/http-factory": "^1.0",
-        "effectra/http-extensions": "^2.1",
+        "effectra/http-extensions": "^2.2",
         "effectra/http-server-handler": "^2.0",
-        "effectra/mail": "^1.0",
+        "effectra/mail": "^2.1",
         "effectra/link": "^1.0",
         "effectra/log": "^1.0",
         "effectra/router": "^2.1",
@@ -46,13 +46,13 @@
         "effectra/third-party": "^1.0",
         "effectra/http-middleware": "^1.0",
         "effectra/minifyer": "^1.0",
-        "vlucas/valitron": "^1.4",
         "effectra/cache": "^1.0",
-        "league/climate": "^3.8",
         "effectra/sql-query": "^2.0",
         "effectra/tracker": "^1.0",
+        "effectra/event-dispatcher":"^1.0",
+        "league/climate": "^3.8",
         "bmt/noun-converter": "^1.0",
         "psr/event-dispatcher": "^1.0",
-        "effectra/event-dispatcher":"^1.0"
+        "vlucas/valitron": "^1.4"
     }
 }
