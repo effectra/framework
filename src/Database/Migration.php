@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Effectra\Core\Database;
 
 use Effectra\Core\Application;
-use Effectra\Core\Container\DiClasses;
 use Effectra\Core\Facades\DB;
 use Effectra\Fs\Directory;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
+use Effectra\Router\Resolver;
 use Effectra\SqlQuery\Query;
 use Effectra\SqlQuery\Table;
 use Symfony\Component\VarDumper\VarDumper;
@@ -190,17 +190,17 @@ class Migration
         }
 
         // Load the migration class instance
-        $instance = DiClasses::load($className);
+        $instance = Resolver::resolveClass($className);
 
         // Perform migration based on the action (up or down)
         if ($act === 'up') {
-            if (!method_exists($instance, 'up')) {
+            if (!method_exists($className, 'up')) {
                 throw new \Exception("Undefined method 'up' in $filename.");
             }
             $instance->up();
             $this->migrated = true;
         } elseif ($act === 'down') {
-            if (!method_exists($instance, 'down')) {
+            if (!method_exists($className, 'down')) {
                 throw new \Exception("Undefined method 'down' in $filename.");
             }
             $instance->down();
