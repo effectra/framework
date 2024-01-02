@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Effectra\Core\Security;
 
+use Effectra\Core\Exceptions\ExpiredTimeException;
+use Effectra\Http\Message\Uri;
+use Psr\Http\Message\UriInterface;
+
 /**
  * Class EncryptUrl
  *
@@ -11,6 +15,11 @@ namespace Effectra\Core\Security;
  */
 class EncryptUrl
 {
+
+    public function __construct(private readonly string $secretKey)
+    {
+       
+    }
 
     /**
      * Generates an encrypted URL with the provided parameters.
@@ -20,61 +29,59 @@ class EncryptUrl
      * @param string    $url           The URL to append the encrypted data as query parameters.
      * @param string    $secretKey     The secret key used for encryption.
      *
-     * @return string The generated encrypted URL.
+     * @return UriInterface The generated encrypted URL.
      */
-    public function generate(mixed $data, \DateTime $expiration, string $url, string $secretKey)
+    public function set(mixed $data, \DateTime $expiration, string $url):UriInterface
     {
-        // Convert data to JSON format
+        $iv = openssl_random_pseudo_bytes(16);
+
         $jsonData = json_encode($data);
 
-        // Encrypt the JSON data using AES-256-CBC encryption
-        $encryptedData = openssl_encrypt($jsonData, 'AES-256-CBC', $secretKey, 0, substr(md5($secretKey), 0, 16));
+        $encryptedData = openssl_encrypt($jsonData, 'AES-256-CBC', $this->secretKey, 0, substr(md5($this->secretKey), 0, 16));
 
-        // Generate the expiration timestamp
         $expirationTimestamp = $expiration->getTimestamp();
 
-        // Append encrypted data and expiration timestamp as query parameters to the URL
-        $encryptedUrl = $url . '?' . http_build_query(['data' => $encryptedData, 'expiration' => $expirationTimestamp]);
+        $data = base64_encode($iv . $encryptedData);
 
-        return $encryptedUrl;
+        return (new Uri($url))->withQuery(http_build_query(['hash' => $data, 'expiration' => $expirationTimestamp]));
     }
 
     /**
-     * Validates and decrypts an encrypted URL.
+     * parse and decrypts an encrypted URL.
      *
-     * @param string $encryptedUrl  The encrypted URL to validate and decrypt.
+     * @param UriInterface|string $encryptedUrl  The encrypted URL to validate and decrypt.
      * @param string $secretKey     The secret key used for decryption.
      *
      * @return mixed The decrypted data.
-     * @throws \RuntimeException If the encrypted URL is invalid or has expired.
+     * @throws \RuntimeException If the encrypted URL is invalid.
+     * @throws \ExpiredTimeException If the encrypted URL has expired.
      */
-    public function validate(string $encryptedUrl, string $secretKey): mixed
+    public function get(UriInterface|string $encryptedUrl): mixed
     {
-        // Parse the URL to retrieve query parameters
-        $urlParts = parse_url($encryptedUrl);
-        parse_str($urlParts['query'], $queryParams);
+        if(is_string($encryptedUrl)){
+            $encryptedUrl = new Uri($encryptedUrl);
+        }
+        parse_str($encryptedUrl->getQuery(), $queryParams);
 
-        // Ensure the required parameters are present
-        if (!isset($queryParams['data'], $queryParams['expiration'])) {
+        if (!isset($queryParams['hash'], $queryParams['expiration'])) {
             throw new \RuntimeException('Invalid encrypted URL: missing required parameters.');
         }
 
-        // Retrieve encrypted data and expiration timestamp
-        $encryptedData = $queryParams['data'];
+        $data = $queryParams['hash'];
+       
+        $encrypted = base64_decode($data);
+        // $iv = substr($encrypted, 0, 16);
+        $encryptedData = substr($encrypted, 16);
         $expirationTimestamp = (int) $queryParams['expiration'];
 
-        // Check if the URL has expired
         if ($expirationTimestamp < time()) {
-            throw new \RuntimeException('Encrypted URL has expired.');
+            throw new ExpiredTimeException('Encrypted URL has expired.');
         }
 
-        // Decrypt the data using AES-256-CBC decryption
-        $decryptedData = openssl_decrypt($encryptedData, 'AES-256-CBC', $secretKey, 0, substr(md5($secretKey), 0, 16));
+        $decryptedData = openssl_decrypt($encryptedData, 'AES-256-CBC', $this->secretKey, 0, substr(md5($this->secretKey), 0, 16));
 
-        // Parse the JSON data
         $data = json_decode($decryptedData, true);
 
-        // Return the decrypted data
         return $data;
     }
 }
