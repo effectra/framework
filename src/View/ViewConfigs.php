@@ -4,7 +4,7 @@ namespace Effectra\Core\View;
 
 use Effectra\Core\Application;
 use Effectra\Core\EncoreProvider\WebpackEncore;
-use Effectra\Core\Facades\Request;
+use Effectra\Core\View;
 use Effectra\Fs\Path;
 use Effectra\Link\Link;
 use Effectra\Link\LinkProvider;
@@ -29,9 +29,6 @@ class ViewConfigs
                 $view = Application::container()->get(View::class);
                 return $view->renderSection($name);
             }],
-            ['url' => function ($path = '') {
-                return Request::url() . (string) $path;
-            }],
             ['app_url' => function ($path = '') {
                 return env('APP_URL', '/') . (string) $path;
             }],
@@ -47,7 +44,7 @@ class ViewConfigs
             }],
             ['web_encore_js' => function ($file) {
                 try {
-                    $webpackEncore = new WebpackEncore();
+                    $webpackEncore = new WebpackEncore(Application::publicPath('static'));
                   return  $webpackEncore->scriptTags($file);
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_JS: error('. $e->getMessage() .')';
@@ -55,7 +52,7 @@ class ViewConfigs
             }],
             ['web_encore_css' => function ($file) {
                 try {
-                    $webpackEncore = new WebpackEncore();
+                    $webpackEncore = new WebpackEncore(Application::publicPath('static'));
                   return  $webpackEncore->linkTags($file);
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';

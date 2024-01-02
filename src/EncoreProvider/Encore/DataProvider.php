@@ -59,9 +59,9 @@ final class DataProvider implements DataGather
      * Provider constructor.
      * @param string $encoreConfigPath
      */
-    public function __construct()
+    public function __construct(string $encoreConfigPath)
     {
-        $this->encoreConfigPath = Application::publicPath('static/'); 
+        $this->encoreConfigPath = $encoreConfigPath; 
     }
 
     /**

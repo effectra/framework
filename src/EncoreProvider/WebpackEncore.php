@@ -26,9 +26,9 @@ class WebpackEncore
     /**
      * WebpackEncore constructor.
      */
-    public function __construct()
+    public function __construct(string $configPath)
     {
-        $this->processor = new Processor(new DataProvider());
+        $this->processor = new Processor(new DataProvider($configPath));
     }
 
     /**

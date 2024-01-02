@@ -78,9 +78,11 @@ class Render
     {
         return implode(' ', array_map(function ($attr, $value) {
 
-            return sprintf('%s="%s"', $attr,
-                filter_var($value, FILTER_SANITIZE_STRING));
-
+            return sprintf(
+                '%s="%s"',
+                $attr,
+                filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+            );
         }, array_keys($attributes), $attributes));
     }
 
