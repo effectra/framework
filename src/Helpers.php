@@ -10,12 +10,13 @@ use Effectra\Core\View;
 use Effectra\Fs\File;
 use Effectra\Fs\Path;
 use Effectra\Fs\Type\Json;
+use Effectra\Mail\Contracts\MailerInterface;
 use Effectra\Mail\MailerService;
 use Effectra\Router\Route;
 use Effectra\Session\Contracts\SessionInterface;
 use Effectra\Session\Session;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
+
 
 if (!function_exists('env')) {
     /**
@@ -80,28 +81,11 @@ if (!function_exists('request')) {
     /**
      * Create a new HTTP request.
      *
-     * @param string $method The HTTP request method.
-     * @param UriInterface $uri The request URI.
-     * @param array $headers The request headers.
-     * @param mixed $body The request body.
-     * @param string $protocolVersion The HTTP protocol version.
-     * @param array $queryParams The query parameters.
-     * @param mixed $parsedBody The parsed request body.
-     * @param array $attributes The request attributes.
-     *
      * @return Request The created HTTP request.
      */
-    function request(
-        string $method,
-        UriInterface $uri,
-        array $headers = [],
-        $body = '',
-        string $protocolVersion = '1.1',
-        array $queryParams = [],
-        $parsedBody = null,
-        array $attributes = []
-    ): Request {
-        return new Request(...func_get_args());
+    function request(): Request
+    {
+        return Application::container()->get(Request::class);
     }
 }
 
@@ -224,17 +208,15 @@ if (!function_exists('view')) {
     }
 }
 
-if (!function_exists('phpMailer')) {
+if (!function_exists('mailer')) {
+
     /**
-     * Import content from a file in the "imports" directory.
-     *
-     * @param string $file The name of the file to import.
-     *
-     * @return mixed The imported content.
+     * Represents a mailer function for sending emails.
+     * @return MailerInterface
      */
-    function phpMailer(): MailerService
+    function mailer(): MailerInterface
     {
-        return Application::container()->get(MailerService::class)->setupPHPMailer();
+        return Application::container()->get(MailerInterface::class)->setupPHPMailer();
     }
 }
 
@@ -246,7 +228,7 @@ if (!function_exists('redirect')) {
      */
     function redirect(string $url, int $statusCode = 302): ResponseInterface
     {
-        return new RedirectResponse($url,$statusCode);
+        return new RedirectResponse($url, $statusCode);
     }
 }
 
@@ -372,5 +354,14 @@ if (!function_exists('pre')) {
         echo '<pre >';
         var_dump(...func_get_args());
         echo '<pre>';
+    }
+}
+
+
+if (!function_exists('vd')) {
+    function vd(mixed $value, array ...$values)
+    {
+        echo json_encode(func_get_args());
+        die;
     }
 }
