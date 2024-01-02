@@ -7,7 +7,7 @@ namespace Effectra\Core\Facades;
 use Effectra\Core\Facade;
 use Effectra\Core\View as CoreView;
 
-/** @method static \Effectra\Core\View render(string $view, $data = [])  
+/** @method static \Effectra\Core\View render(string $view, $data = []):self
  */
 
 class View extends Facade
