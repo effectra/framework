@@ -9,17 +9,23 @@ use Effectra\Core\Application;
 use Effectra\Core\Container\ServiceProvider;
 use Effectra\Core\Contracts\ProviderInterface;
 use Effectra\Core\Contracts\ServiceInterface;
-use Effectra\Mail\Mailer;
+use Effectra\Mail\Contracts\MailerInterface;
+use Effectra\Mail\Services\PHPMailerService;
+
 
 class MailerProvider  extends ServiceProvider implements ServiceInterface
 {
     public function register(ProviderInterface $provider)
     {
-        $provider->bind(Mailer::class, function () {
+        $provider->bind(MailerInterface::class, function () {
+
             $configFile = new ConfigFile(Application::configPath('mail.php'));
+
             $config = $configFile->getSection('sender');
+
             extract($config);
-            $mailer = new Mailer(
+
+            $mailer = new PHPMailerService(
                 $driver,
                 $host,
                 intval($port),
@@ -27,6 +33,9 @@ class MailerProvider  extends ServiceProvider implements ServiceInterface
                 $password,
                 $from
             );
+
+            $mailer->setLogger(Application::log());
+
             return $mailer;
         });
     }
