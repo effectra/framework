@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Effectra\Core\Auth;
+namespace Effectra\Core\Authentication;
 
-
+use Effectra\Http\Message\Uri;
 
 /**
  * Class SignedUrl
@@ -37,31 +37,38 @@ class SignedUrl
      *
      * @return string The generated signed URL.
      */
-    public function generate(string|int $userId, string $email, \DateTime $expirationDate)
+    public function generate(string|int $userId, string $email, \DateTime $expirationDate): string
     {
         // Get the expiration timestamp from the DateTime object
         $expiration = $expirationDate->getTimestamp();
-    
-        // Generate route parameters
-        $routeParams = ['id' => $userId, 'hash' => sha1($email)];
-    
+
         // Generate query parameters
-        $queryParams = ['expiration' => $expiration];
-    
+        $queryParams = [
+            'user' => $userId,
+            'email' => $email,
+        ];
+
         // Get the base URL from the environment
         $baseUrl = trim($_ENV['APP_URL'] ?? '', '/');
-    
+
+        $urlPath = sprintf('%s/%s/', $baseUrl, $this->endpoint);
+
         // Build the URL with route and query parameters
-        $url = $baseUrl . $this->endpoint . join('/', $routeParams) . http_build_query($queryParams);
-    
+        $url = (string) (new Uri($urlPath))->withQuery(http_build_query($queryParams));
+
         // Get the secret key from the environment
         $secretKey = $_ENV['APP_KEY'];
-    
+
         // Calculate the signature using HMAC-SHA256
         $signature = hash_hmac('sha256', $url, $secretKey);
-    
+
         // Append the signature to the query parameters
-        return $baseUrl . $this->endpoint . http_build_query($queryParams + ['signature' => $signature]);
+        return (string) (new Uri($url))->withQuery(http_build_query(['expiration' => $expiration , 'signature' => $signature]));
+    }
+
+    public function bindRouteParam(array $routeParams): string
+    {
+        return join('/', array_map(fn ($param) => sprintf("{%s}", $param), $routeParams));
     }
 
     /**
@@ -75,47 +82,46 @@ class SignedUrl
     public function validate(string $signedUrl): bool
     {
         $urlParts = parse_url($signedUrl);
-    
+
         // Ensure the URL contains the required components
         if (!isset($urlParts['query'])) {
             throw new \RuntimeException('Invalid signed URL: missing query parameters.');
         }
-    
+
         // Extract the query parameters from the URL
         parse_str($urlParts['query'], $queryParams);
-    
+
         // Ensure the required parameters are present
         if (!isset($queryParams['expiration'], $queryParams['signature'])) {
             throw new \RuntimeException('Invalid signed URL: missing required parameters.');
         }
-    
+
         // Retrieve the expiration and signature values
         $expiration = (int) $queryParams['expiration'];
         $signature = $queryParams['signature'];
-    
+
         // Check if the URL has expired
         if ($expiration < time()) {
             throw new \RuntimeException('Signed URL has expired.');
         }
-    
+
         // Retrieve the base URL from the signed URL
         $baseUrl = $urlParts['scheme'] . '://' . $urlParts['host'] . $urlParts['path'];
-    
+
         // Reconstruct the original URL without the signature parameter
         $originalUrl = $baseUrl . '?' . http_build_query(array_diff_key($queryParams, ['signature' => '']));
-    
+
         // Retrieve the secret key from the environment
         $secretKey = $_ENV['APP_KEY'];
-    
+
         // Calculate the expected signature for the original URL
         $expectedSignature = hash_hmac('sha256', $originalUrl, $secretKey);
-    
+
         // Compare the expected signature with the provided signature
         if (!hash_equals($expectedSignature, $signature)) {
             throw new \RuntimeException('Invalid signed URL: signature mismatch.');
         }
-    
+
         return true;
     }
-    
 }
