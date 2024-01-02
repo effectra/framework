@@ -10,6 +10,7 @@ use Effectra\Core\Contracts\ServiceInterface;
 use Effectra\Core\Http\Factory\RequestFactory;
 use Effectra\Core\Http\Factory\ResponseFactory;
 use Effectra\Http\Factory\UriFactory;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\UriFactoryInterface;
 
