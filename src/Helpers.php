@@ -15,8 +15,9 @@ use Effectra\Mail\MailerService;
 use Effectra\Router\Route;
 use Effectra\Session\Contracts\SessionInterface;
 use Effectra\Session\Session;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\ResponseInterface;
-
+use Psr\SimpleCache\CacheInterface;
 
 if (!function_exists('env')) {
     /**
@@ -179,7 +180,17 @@ if (!function_exists('router')) {
         return Application::container()->get(Route::class);
     }
 }
-
+if (!function_exists('cache')) {
+    /**
+     * Get the cache instance.
+     *
+     * @return CacheInterface The cache instance.
+     */
+    function cache():CacheInterface
+    {
+        return Application::container()->get(CacheInterface::class);
+    }
+}
 if (!function_exists('session')) {
     /**
      * Get the session instance.
