@@ -44,7 +44,7 @@ class ViewConfigs
             }],
             ['web_encore_js' => function ($file) {
                 try {
-                    $webpackEncore = new WebpackEncore(Application::publicPath('static'));
+                    $webpackEncore = new WebpackEncore(AppView::getEncoreFolderPath());
                   return  $webpackEncore->scriptTags($file);
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_JS: error('. $e->getMessage() .')';
@@ -52,7 +52,7 @@ class ViewConfigs
             }],
             ['web_encore_css' => function ($file) {
                 try {
-                    $webpackEncore = new WebpackEncore(Application::publicPath('static'));
+                    $webpackEncore = new WebpackEncore(AppView::getEncoreFolderPath());
                   return  $webpackEncore->linkTags($file);
                 } catch (\Exception $e) {
                     return 'WEB_ENCORE_CSS error('. $e->getMessage() .')';
