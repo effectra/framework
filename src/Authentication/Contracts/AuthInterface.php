@@ -9,57 +9,108 @@ use Effectra\Core\Authentication\RegisterUserData;
 /**
  * Interface AuthInterface
  *
- * Defines the contract for authentication classes.
+ * Defines the contract for authentication-related operations.
+ *
+ * @package Effectra\Core\Authentication\Contracts
  */
 interface AuthInterface
 {
-    public function setToken(string $token);
-    public function getToken() :?string;
-
-    public function user(): ?UserInterface;
     /**
-     * Attempt to validate a login token.
+     * Set the authentication token.
      *
-     * @param array $credentials The login credentials.
-     * @return bool Whether the token is valid or not.
+     * @param string $token
+     */
+    public function setToken(string $token);
+
+    /**
+     * Get the authentication token.
+     *
+     * @return string|null
+     */
+    public function getToken(): ?string;
+
+    /**
+     * Get the currently authenticated user.
+     *
+     * @return UserInterface|null
+     */
+    public function user(): ?UserInterface;
+
+    /**
+     * Attempt to log in with the provided credentials.
+     *
+     * @param array $credentials
      */
     public function attemptLogin(array $credentials);
 
     /**
-     * Check the user's credentials.
+     * Check if the provided credentials are valid for the given user.
+     *
+     * @param UserInterface $user
+     * @param array         $credentials
      *
      * @return bool
      */
     public function checkCredentials(UserInterface $user, array $credentials): bool;
 
     /**
-     * Log out the user.
-     *
-     * @return void
+     * Log out the currently authenticated user.
      */
     public function logout();
 
     /**
-     * Register a new user.
+     * Register a new user based on the provided data.
      *
-     * @param RegisterUserData $data The data of the new user.
-     * @return mixed The newly created user object, or null if registration fails.
+     * @param RegisterUserData $data
+     *
+     * @return UserInterface
      */
-    public function register(RegisterUserData $data):UserInterface;
+    public function register(RegisterUserData $data): UserInterface;
 
     /**
-     * Log in a user.
+     * Log in the provided user.
      *
-     * @param UserInterface $user The login user.
+     * @param UserInterface $user
      */
     public function login(UserInterface $user);
 
+    /**
+     * Update the password for the provided user.
+     *
+     * @param UserInterface $user
+     * @param string        $password
+     */
+    public function updatePassword(UserInterface $user, string $password);
 
-    public function updatePassword(UserInterface $user,string $password);
-
+    /**
+     * Verify the provided user.
+     *
+     * @param UserInterface $user
+     */
     public function verifyUser(UserInterface $user);
+
+    /**
+     * Send a verification email to the provided user.
+     *
+     * @param UserInterface $user
+     */
     public function sendVerifyMail(UserInterface $user);
+
+    /**
+     * Attempt two-factor login with the provided data.
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
     public function attemptTwoFactorLogin(array $data): bool;
+
+    /**
+     * Send a forgot password email to the user with the provided email address.
+     *
+     * @param string $email
+     *
+     * @return bool
+     */
     public function sendForgotPasswordMail(string $email): bool;
 }
-
