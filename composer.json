@@ -53,6 +53,7 @@
         "league/climate": "^3.8",
         "bmt/noun-converter": "^1.0",
         "psr/event-dispatcher": "^1.0",
-        "vlucas/valitron": "^1.4"
+        "vlucas/valitron": "^1.4",
+        "effectra/cors": "^1.0"
     }
 }
