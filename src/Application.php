@@ -289,7 +289,7 @@ class Application
      */
     public function getMiddlewares(string $type = 'web'): array
     {
-        $middlewares = AppMiddleware::get($type) + $this->appCore->middlewares[$type];
+        $middlewares = array_merge(AppMiddleware::get($type) ,$this->appCore->middlewares[$type]);
 
         $middlewaresInstant =  array_map(function ($middleware) {
             return Resolver::resolveClass($middleware);
@@ -352,7 +352,6 @@ class Application
 
         $response = $handler->handle($request);
 
-
         $request = $router->rebuildRequestUri($request);
 
         $router->set(
@@ -363,6 +362,7 @@ class Application
         $router->register();
 
         $response = $router->handle($request);
+
 
         static::container()->set(Route::class, $router->getRouter());
 
