@@ -39,7 +39,7 @@ class GenerateProvider extends Command
 
         $path = Application::appPath('app' . Path::ds() . 'Providers');
 
-        $config = new ConfigureFile('Controller', $name, $path);
+        $config = new ConfigureFile('Provider', $name, $path);
 
         $className =  $config->toClassName($name);
 
@@ -62,7 +62,7 @@ class GenerateProvider extends Command
             $io->success('File created successfully!');
         }
         if ($state === false) {
-            $errorMessage = ' Failed to create the file. Please check the file path and ensure that you have the necessary permissions.';
+            $errorMessage = 'Failed to create the file. Please check the file path and ensure that you have the necessary permissions.';
 
             $io->errorMsg($errorMessage);
         }
