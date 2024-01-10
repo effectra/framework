@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Effectra\Core\Cmd\Tasks;
 
 use Effectra\Core\Application;
+use Effectra\Core\ConfigureFile;
 use Effectra\Core\Console\ConsoleBlock;
 use Effectra\Core\Log\ConsoleLogTrait;
 use Effectra\Core\Tasks\CronScheduler;
@@ -41,7 +42,13 @@ class AddTask extends Command
 
         $cron = new CronScheduler();
 
-        $path = Application::appPath('scripts' . Path::ds() . $input->getArgument('name'));
+        $name =  $input->getArgument('name');
+
+        $path = Application::appPath('scripts' . Path::ds() . $name . '.php');
+
+        $config = new ConfigureFile('', $name, $path);
+
+        $savePath = $config->toFilePath(ConfigureFile::CREATE_FOLDER_IF_NOT_EXCITE);
 
         $cron->addJob(
             $input->getOption('m'),
@@ -49,7 +56,7 @@ class AddTask extends Command
             $input->getOption('d'),
             $input->getOption('mth'),
             $input->getOption('w'),
-            $path,
+            $savePath,
         );
 
         $cron->save();
