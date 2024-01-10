@@ -44,7 +44,7 @@ class DatabaseState extends Command
             $io->success('Table dropped successfully!');
         }
         if ($state === false) {
-            $errorMessage = 'Failed  droping the table.';
+            $errorMessage = 'Failed dropping the table.';
             
             $io->errorMsg($errorMessage);
         }
